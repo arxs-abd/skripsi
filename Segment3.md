@@ -19,13 +19,15 @@ Prosedur Penelitian merupakan serangkaian kegiatan yang dilaksanakan secara sist
 
 ### 3.2.1 Use Case Diagram
 
-Berikut use case diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity
+Use Case Diagram adalah suatu jenis diagram yang menggambarkan hubungan atau interaksi dari sebuah sistem dengan pengguna. Dengan adanya Use Diagram, kita dapat mendeskripsikan tipe atau jenis yang dilakukan pengguna terhadap sebuah sistem. Berikut use case diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity
 
 ![Use Case Diagram](img/use_case.png)
 
 ### 3.3.2 ER Diagram
 
 Berikut ER diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity
+
+## 3.3 Metode Penelitian
 
 ## 3.3 Instrumen Penelitian
 
