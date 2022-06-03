@@ -14,109 +14,121 @@
 
 ## 2.2 Landasan Teori
 
-- Sistem Infromasi
-  Sistem Informasi terdiri dari dua kata yaitu Sistem dan Informasi. Sistem adalah diagram aktivitas atau activity diagram menggambarkan workflow (aliran kerja) atau aktivitas dari sebuah sistem atau proses bisnis atau menu yang ada pada perangkat lunak (Sukanto dan M.Salahuddin, 2015). Sedangkan informasi adalah sekumpulan data atau fakta yang diorganisasi atau diolah dengan cara tertentu sehingga mempunyai arti bagi penerima. (Anggerani dan Irvani, 2017). Jadi Sistem Informasi adalah sebuah aktivitas antara manusia dan teknologi yang memanajemen sebuah sistem yang mempermudah kegiatan manusia.
+### 2.2.1 Sistem Infromasi
 
-  Dengan adanya sebuah Sistem Informasi yang semakin berkembang saat ini, maka akan mempermudah kehidupan manusia dalam mengelola sebuah data bahkan meningkatkan produktivitas serta meminimalisir terjadinya banyak kesalahan yang terjadi. Sebagai contoh pembelajaran E-Learning dimana dengan adanya sebuah sistem informasi ini dapat mempermudah orang untuk memperoleh ilmu dari mana saja dan kapan saja.
+Sistem Informasi terdiri dari dua kata yaitu Sistem dan Informasi. Sistem adalah diagram aktivitas atau activity diagram menggambarkan workflow (aliran kerja) atau aktivitas dari sebuah sistem atau proses bisnis atau menu yang ada pada perangkat lunak (Sukanto dan M.Salahuddin, 2015). Sedangkan informasi adalah sekumpulan data atau fakta yang diorganisasi atau diolah dengan cara tertentu sehingga mempunyai arti bagi penerima. (Anggerani dan Irvani, 2017). Jadi Sistem Informasi adalah sebuah aktivitas antara manusia dan teknologi yang memanajemen sebuah sistem yang mempermudah kegiatan manusia.
 
-- Hypertext Transfer Protocol Secure (HTTPS)
-  Hypertext Transfer Protocol Secure (HTTPS) adalah sebuah protocol komunikasi dalam suatu jaringan internet dengan keamanan yang lebih terjamin. Disebut lebih aman karena suatu perintah atau data yang dikirim melalui HTTPS ini dilindungi dengan sistem enkripsi sehingga menyulitkan hacker untuk membobol atau mencurinya (Fakhri Aziz Firmansyah, 2019). HTTPS merupakan tingkatan dari HTTP dimana yang membedakan di HTTPS terdapat (Secure Socket Layer) SSL dan (Transport Layer Security) TSL yang digunakan untuk mengamankan data yang disimpan atau yang akan dikirim. Menurut SSL Labs pada April 2018, 33,2% dari 1.000.000 situs web teratas Alexa menggunakan HTTPS sebagai default, 57,1% dari 137.971 situs web paling populer di Internet memiliki implementasi HTTPS yang aman, dan 70% dari pemuatan halaman (diukur oleh Firefox Telemetry) menggunakan HTTPS. Jadi saat ini website sekarang sudah mulai beralih dari sebelumnya HTTP ke HTTPS karena di HTTPS lebih aman daripada HTTP yang sudah lama.
+Dengan adanya sebuah Sistem Informasi yang semakin berkembang saat ini, maka akan mempermudah kehidupan manusia dalam mengelola sebuah data bahkan meningkatkan produktivitas serta meminimalisir terjadinya banyak kesalahan yang terjadi. Sebagai contoh pembelajaran E-Learning dimana dengan adanya sebuah sistem informasi ini dapat mempermudah orang untuk memperoleh ilmu dari mana saja dan kapan saja.
 
-- Javascript
-  Javascript adalah sebuah bahasa pemrograman tingkat tinggi yang dinamis, scripting, untyped, dan interpreter. Javascript sendiri dibuat oleh Brendan Eich dari perusahaan Nestcape pada tahun 1994 yang diberi nama Mocha pada saat itu, kemudian berganti menjadi Livescript. Karena saat itu browser yang populer adalah Nestcape, Microsoft berusaha untuk mengalahkan popularitas browser tersebut dengan Internet Explorer dan melakukan Reverse Enginering terhadap Livescript dan terciptalah JScript pada tahun 1996. Karena terdapat dua browser yang besar yang berbeda, maka dibuatlah satu standar agar mempermudah pembuatan website saat itu dan dibuatlah ECMAScript. Menurut Douglas Rockford, "JavaScript, JScript, and ECMAScript 3 Silly Name for 1 Silly Language" yang berarti bahwa ketiga nama tersebut adalah bahasa yang sama yaitu Javascript.
+### 2.2.2 Hypertext Transfer Protocol Secure (HTTPS)
 
-  a. Karakteristik Javascript
+Hypertext Transfer Protocol Secure (HTTPS) adalah sebuah protocol komunikasi dalam suatu jaringan internet dengan keamanan yang lebih terjamin. Disebut lebih aman karena suatu perintah atau data yang dikirim melalui HTTPS ini dilindungi dengan sistem enkripsi sehingga menyulitkan hacker untuk membobol atau mencurinya (Fakhri Aziz Firmansyah, 2019). HTTPS merupakan tingkatan dari HTTP dimana yang membedakan di HTTPS terdapat (Secure Socket Layer) SSL dan (Transport Layer Security) TSL yang digunakan untuk mengamankan data yang disimpan atau yang akan dikirim. Menurut SSL Labs pada April 2018, 33,2% dari 1.000.000 situs web teratas Alexa menggunakan HTTPS sebagai default, 57,1% dari 137.971 situs web paling populer di Internet memiliki implementasi HTTPS yang aman, dan 70% dari pemuatan halaman (diukur oleh Firefox Telemetry) menggunakan HTTPS. Jadi saat ini website sekarang sudah mulai beralih dari sebelumnya HTTP ke HTTPS karena di HTTPS lebih aman daripada HTTP yang sudah lama.
 
-  - File
-    Untuk Ekstensi dari file Javascript menggunakan ekstensi \*.js. Contoh namaFile.js.
-    Setiap akhir dari kode javascript dapat menggunakan ; ataupun tidak. Sedangkan block scope di Javascript menggunakan { }.
+### 2.2.3 Javascript
 
-  - Variabel
-    Javascript merupakan salah satu bahasa pemrogram yang untyped / dynamicly typed yang berarti tidak mendefiniskan terlebih dahulu type variabel yang akan didefinisikan. Untuk penamaan variabel, terdapat beberapa keyword yaitu var, let, dan const. Untuk var, dan let, nilai variabel dapat berubah atau diisi ulang, sedangkan const nilai variabelnya tidak dapat diubah. Perbedaan var dan let sendiri terletak pada hoistingnya. Sedangkan untuk penamaan variabel, hampir sama dengan beebrapa bahasa pemrograman lainnya seperti karakter pertama variabel tidak boleh angka, menggunakan penulisan camelCase, dan untuk keyword const yang merupakan variabel const biasanya menggunakan snake_case dan semuanya huruf kapital. Contoh :
-    ```Javascript
-    var value = 10 // Contoh Penggunaan var
-    let nilai = 'Delapan' // Contoh Penggunaan let
-    const SPEED_OF_LIGHT = 3.14 // Contoh Penggunaan const
-    ```
-  - Tipe Data
-    Javascript memiliki beberapa tipe data seperti String, Number atau Integer, Boolean, Array, Object, dan Undifined. Untuk mengetahui tipe data dari sebuah variabel dapat menggunakan keyword typeof. Contoh :
-    ```Javascript
-    let name = 'Aris Akhyar Abdillah' // String
-    let age = 22 // Number atau Integer
-    let male = true // Boolean
-    let family = ['Father', 'Mother', 'Son', 'Girl'] // Array
-    let cv = {
-      fullName : 'Aris Akhyar Addillah',
-      nim : 'H071171505'
-    } // Object
-    let girlfreind = undefined // Undefined
-    ```
-  - Synchronous dan Asynchronous
-    Secara sederhana, Syncronus dan Asynchronous merupakan tahapan dalam mengeksekusi sebuah kode dimana Synchronous mengeksekusi sebuah kode perbaris sesuai urutan kode yang dituliskan. Sedangkan Asynchronous, tidak selalu seperti Synchronous, tapi melihat waktu proses dari kode tersebut. Penggunaan Asynchronous tidak akan menunggu suatu kode selesai dijalankan, tetapi berlanjut ke kode selanjutnya. Contoh :
+Javascript adalah sebuah bahasa pemrograman tingkat tinggi yang dinamis, scripting, untyped, dan interpreter. Javascript sendiri dibuat oleh Brendan Eich dari perusahaan Nestcape pada tahun 1994 yang diberi nama Mocha pada saat itu, kemudian berganti menjadi Livescript. Karena saat itu browser yang populer adalah Nestcape, Microsoft berusaha untuk mengalahkan popularitas browser tersebut dengan Internet Explorer dan melakukan Reverse Enginering terhadap Livescript dan terciptalah JScript pada tahun 1996. Karena terdapat dua browser yang besar yang berbeda, maka dibuatlah satu standar agar mempermudah pembuatan website saat itu dan dibuatlah ECMAScript. Menurut Douglas Rockford, "JavaScript, JScript, and ECMAScript 3 Silly Name for 1 Silly Language" yang berarti bahwa ketiga nama tersebut adalah bahasa yang sama yaitu Javascript.
 
-    ```Javascript
-    // Menggunakan Synchronous
+#### 2.2.3.1 Karakteristik Javascript
 
-    console.log('What Is Your Name ?')
-    console.log('Hello World')
-    console.log('My Name is Aris')
+- File
+  Untuk Ekstensi dari file Javascript menggunakan ekstensi \*.js. Contoh namaFile.js.
+  Setiap akhir dari kode javascript dapat menggunakan ; ataupun tidak. Sedangkan block scope di Javascript menggunakan { }.
 
-    // Output :
-    // What Is Your Name ?
-    // Hello World
-    // My Name is Aris
-
-    // Menggunakan Asynchronous
-
-    setTimeout(function() {
-      console.log('What Is Your Name ?')
-    }, 1500)
-    console.log('Hello World')
-    setTimeout(function() {
-      console.log('My Name is Aris')
-    }, 1000)
-
-    // Output :
-    // Hello World
-    // My Name is Aris
-    // What Is Your Name ?
-    ```
-
-    Jika melihat output dari dua program diatas antara menggunakan Synchronous dan Asynchronous terdapat perbedaan urutan dari hasil output, dimana Synchronous memiliki output sesuai dari urutan baris kode sedangkan Asynchronous berbeda dimana output yang dihasilkan berdasarkan jumlah waktu pengeksekusian dari kode tersebut yang disimulasikan menggunakan setTimeout() dari pengeksekusian paling cepat hingga yang paling lambat.
-
-  b. NodeJS
-  Node.js adalah runtime environment untuk JavaScript yang bersifat open-source dan cross-platform. Dengan Node.js kita dapat menjalankan kode JavaScript di mana pun, tidak hanya terbatas pada lingkungan browser. Seperti diketahui bahawa Javascript hanya dapat berjalan pada sebuah web browser, kemudian Ryan Dahl, membuat sebuah runtime environment dengan mengeluarkan engine Javasscript dari Chrome yaitu V8 Javascript Engine menggunakan bahaasa C agar Javascript dapat dijalankan diluar browser. Akhirnya tercipta NodeJS pada tahun 2009. Dengan Begitu, Javascript yang sebelumnya hanya bisa di client side dengan adanya NodeJS bisa juga di server side. Beberapa fitur yang terdapat di NodeJS seperti Asynchronous & Event-driven, Single Threaded but Highly Scalable.
-
-  c. Express JS
-  Menurut Website resmi dari Express JS adalah 'Fast, unopinionated, minimalist web framework for Nodejs'. Express JS sendiri merupakan salah satu web framework khusus untuk NodeJS dimana kita dapat membuat sebuah website yang cepat, sederhana, dengan struktur yang tidak ditentukan atau tergantung dari pengguna Express JS sendiri.
-
-- Database
-  Database atau basis data adalah kumpulan informasi yang disimpan di dalam komputer secara sistematik sehingga dapat diperiksa menggunakan suatu program komputer untuk memperoleh informasi dari basis data tersebut (Andry Andaru). Berdasarkan definisi database, database berfungsi untuk menyimpan catatan atau sebuah data pada sebuah penyimpanan yang kemudian akan digunakan pada waktu lainnya. Pada umumnya, database sudah pasti memiliki key dan value, walaupun istilah ini berbeda ditiap tiap jenis database yang ada. Adapun beberapa jenis database seperti Operational Database, Database Warehouse, Distributed Database, Relational Database, dan End User Database.
-
-  a. SQL dan NoSQL
-  SQL dan NoSQL merupakan salah satu contoh dari Relational Database yang populer saat ini. SQL (Structured Query Language) merupakan bahasa yang digunakan untuk mengelola data secara relational. SQL sendiri memiliki ciri yaitu memiliki tabel yang terdiri dengan row atau record dan field yang bisa memiliki relasi dengan tabel lainnya. Untuk tiap data yang ada didalam tabel, harus memiliki skema yang sama untuk tiap recordnya. Contoh dari SQL seperti MySQL, PostgreSQL, dan MariaDB. Berbeda dengan NoSQL (Not Only Structured Query Language) yang merupakan bahasa untuk mengelola data secara Non Relational. Berbeda dengan SQL yang menggunakan tabel untuk menyimpan data. NoSQL memilik banyak jenis tempat untuk menyimpan data seperti Document Database, Key-Value Database, dan Graph Database. NoSQL juga tidak memiliki skema sehingga untuk menyimpan data bisa secara flexibel. Contoh dari NoSQL seperti MongoDB, Redis, Neo4j, dan Cassandra.
-
-  b. MongoDB
-  MongoDB merupakan salah satu contoh dari NoSQL yang dikembangkan menggunakan bahasa pemrograman C++ yang rilis pertama kali pada tanggal 11 Februari 2009. MongoDB adalah salah satu contoh Document Database yang dimana tiap - tiap datanya merupakan sebuah JSON (Javascript Object Notation) atau dalam MongoDB disebut BSON (Binary JSON). Hingga saat ini, MongoDB sudah digunakan lebih dari 85 Juta pengguna diseluruh dunia dan sudah banyak perusahaan besar yang menggunakan database ini seperti EBay, Google, Adobe, dan EA. Salah satu contoh data yang terdapat di MongoDB :
+- Variabel
+  Javascript merupakan salah satu bahasa pemrogram yang untyped / dynamicly typed yang berarti tidak mendefiniskan terlebih dahulu type variabel yang akan didefinisikan. Untuk penamaan variabel, terdapat beberapa keyword yaitu var, let, dan const. Untuk var, dan let, nilai variabel dapat berubah atau diisi ulang, sedangkan const nilai variabelnya tidak dapat diubah. Perbedaan var dan let sendiri terletak pada hoistingnya. Sedangkan untuk penamaan variabel, hampir sama dengan beebrapa bahasa pemrograman lainnya seperti karakter pertama variabel tidak boleh angka, menggunakan penulisan camelCase, dan untuk keyword const yang merupakan variabel const biasanya menggunakan snake_case dan semuanya huruf kapital. Contoh :
+  ```Javascript
+  var value = 10 // Contoh Penggunaan var
+  let nilai = 'Delapan' // Contoh Penggunaan let
+  const SPEED_OF_LIGHT = 3.14 // Contoh Penggunaan const
+  ```
+- Tipe Data
+  Javascript memiliki beberapa tipe data seperti String, Number atau Integer, Boolean, Array, Object, dan Undifined. Untuk mengetahui tipe data dari sebuah variabel dapat menggunakan keyword typeof. Contoh :
+  ```Javascript
+  let name = 'Aris Akhyar Abdillah' // String
+  let age = 22 // Number atau Integer
+  let male = true // Boolean
+  let family = ['Father', 'Mother', 'Son', 'Girl'] // Array
+  let cv = {
+    fullName : 'Aris Akhyar Addillah',
+    nim : 'H071171505'
+  } // Object
+  let girlfreind = undefined // Undefined
+  ```
+- Synchronous dan Asynchronous
+  Secara sederhana, Syncronus dan Asynchronous merupakan tahapan dalam mengeksekusi sebuah kode dimana Synchronous mengeksekusi sebuah kode perbaris sesuai urutan kode yang dituliskan. Sedangkan Asynchronous, tidak selalu seperti Synchronous, tapi melihat waktu proses dari kode tersebut. Penggunaan Asynchronous tidak akan menunggu suatu kode selesai dijalankan, tetapi berlanjut ke kode selanjutnya. Contoh :
 
   ```Javascript
-  {
-    _id : '91829jw1jooojo2',
-    firstName : 'Aris',
-    lastName : 'Akhyar',
-    age : 20
-    hobbies : ['eat', 'drink']
-  }
+  // Menggunakan Synchronous
+
+  console.log('What Is Your Name ?')
+  console.log('Hello World')
+  console.log('My Name is Aris')
+
+  // Output :
+  // What Is Your Name ?
+  // Hello World
+  // My Name is Aris
+
+  // Menggunakan Asynchronous
+
+  setTimeout(function() {
+    console.log('What Is Your Name ?')
+  }, 1500)
+  console.log('Hello World')
+  setTimeout(function() {
+    console.log('My Name is Aris')
+  }, 1000)
+
+  // Output :
+  // Hello World
+  // My Name is Aris
+  // What Is Your Name ?
   ```
 
-- Jurnal
-  Jurnal merupakan bagian dari jenis terbitan berseri yang ada diperpustakaan, adapun pengertian jurnal menurut High Beam “Journal is the collection and periodic publication or transmission of news and the result of research through media”, artinya bahwa jurnal merupakan suatu koleksi dan terbitan berkala atau transmisi mengenai berita dan hasil-hasil penelitian mengenai media. Jurnal sendiri terbagi atas dua format yaitu tercetak dan digital (e-journal). Untuk format digital jurnal dikemas dalam dua format , yaitu bentuk CD-ROM dan dalam bentuk akses secara online melalui internet. E-Journal dipahami sebagai publikasi ilmiah dalam format elektronik dan mempunyai ISSN (International Standard Serial Number) yang format dokumennya biasanya PDF (Rusydi 2014).
+  Jika melihat output dari dua program diatas antara menggunakan Synchronous dan Asynchronous terdapat perbedaan urutan dari hasil output, dimana Synchronous memiliki output sesuai dari urutan baris kode sedangkan Asynchronous berbeda dimana output yang dihasilkan berdasarkan jumlah waktu pengeksekusian dari kode tersebut yang disimulasikan menggunakan setTimeout() dari pengeksekusian paling cepat hingga yang paling lambat.
 
-  Penggunaan kata jurnal untuk berbagai bidang juga memberi arti yang bervariasi, misalnya jurnal dalam bidang ekonomi menunjukan sistem pembukuan rangkap. Jurnal dalam bidang pelayaran diartikan sebagai logbook berarti buku untuk mencatat semua kejadian selama pelayaran. Jurnal sebenarnya merupakan publikasi ilmiah yang memuat informasi tentang hasil kegiatan dalam bidang ilmu pengetahuan dan teknologi minimal harus mencakup kumpulan atau kumulasi pengetahuan baru, pengamatan empiris dan pengembangan gagasan atau usulan. Dengan demikian jurnal merupakan representasi dari pengetahuan baru tentang perkembangan ilmu pengetahuan yang dilaksanakan secara empriris dan biasanya merupakan gagasan yang terbaru.
+#### 2.2.3.2 NodeJS
 
-- Plagiarisme
-  Plagiarisme berasal dari bahasa Latin “plagiare” yang berarti mencuri. Plagiarisme berasal dari kata plagiat yang berarti pengambilan karangan (pendapat dan sebagainya) orang lain dan menjadikannya seolah-olah karangan (pendapat dan sebagainya) sendiri, misalnya menerbitkan karya tulis orang lain atas nama dirinya sendiri. Sehingga dapat diartikan plagiarisme merupakan tindakan mencuri gagasan hasil penelitian orang lain, untuk kemudian disajikan seolah-olah milik sendiri (Ridhatillah, 2013). Tindakan plagiarisme merupakan salah satu tindakan yang melanggar hak cipta. Hak Cipta itu sendiri merupakan hak eksklusif untuk Pencipta ataupun penerima hak buat mengumumkan ataupun perbanyak Ciptaannya ataupun membagikan izin buat itu dengan tidak kurangi pembatasan- pembatasan bagi peraturan perundang- undangan yang berlaku. Jika terjadi pelanggaran tersebut, dapat dikenai pelanggaran hak cipta dPasal 72 ayat UUHC dengan dipidana dengan pidana penjara pendek selama 1 bulan serta/ ataupun denda sangat sedikitnya Rp1.000.000,00, ataupun pidana penjara lama 7 tahun serta/ ataupun denda sangat sebanyak Rp5.000.000.000,00.
+Node.js adalah runtime environment untuk JavaScript yang bersifat open-source dan cross-platform. Dengan Node.js kita dapat menjalankan kode JavaScript di mana pun, tidak hanya terbatas pada lingkungan browser. Seperti diketahui bahawa Javascript hanya dapat berjalan pada sebuah web browser, kemudian Ryan Dahl, membuat sebuah runtime environment dengan mengeluarkan engine Javasscript dari Chrome yaitu V8 Javascript Engine menggunakan bahaasa C agar Javascript dapat dijalankan diluar browser. Akhirnya tercipta NodeJS pada tahun 2009. Dengan Begitu, Javascript yang sebelumnya hanya bisa di client side dengan adanya NodeJS bisa juga di server side. Beberapa fitur yang terdapat di NodeJS seperti Asynchronous & Event-driven, Single Threaded but Highly Scalable.
 
-- Dice Similarity
-  Dice Similarity atau Sørensen–Dice coefficient merupakan salah satu algoritma yang mengukur kesamaan antara dua set data. Algoritma ini banyak digunakan dalam validasi algoritma segmentasi gambar yang dibuat dengan AI, tetapi ini adalah konsep yang jauh lebih umum yang dapat diterapkan pada kumpulan data untuk berbagai aplikasi termasuk NLP.
+#### 2.2.3.3 Express JS
+
+Menurut Website resmi dari Express JS adalah 'Fast, unopinionated, minimalist web framework for Nodejs'. Express JS sendiri merupakan salah satu web framework khusus untuk NodeJS dimana kita dapat membuat sebuah website yang cepat, sederhana, dengan struktur yang tidak ditentukan atau tergantung dari pengguna Express JS sendiri.
+
+### 2.2.4 Database
+
+Database atau basis data adalah kumpulan informasi yang disimpan di dalam komputer secara sistematik sehingga dapat diperiksa menggunakan suatu program komputer untuk memperoleh informasi dari basis data tersebut (Andry Andaru). Berdasarkan definisi database, database berfungsi untuk menyimpan catatan atau sebuah data pada sebuah penyimpanan yang kemudian akan digunakan pada waktu lainnya. Pada umumnya, database sudah pasti memiliki key dan value, walaupun istilah ini berbeda ditiap tiap jenis database yang ada. Adapun beberapa jenis database seperti Operational Database, Database Warehouse, Distributed Database, Relational Database, dan End User Database.
+
+#### 2.2.4.1 SQL dan NoSQL
+
+SQL dan NoSQL merupakan salah satu contoh dari Relational Database yang populer saat ini. SQL (Structured Query Language) merupakan bahasa yang digunakan untuk mengelola data secara relational. SQL sendiri memiliki ciri yaitu memiliki tabel yang terdiri dengan row atau record dan field yang bisa memiliki relasi dengan tabel lainnya. Untuk tiap data yang ada didalam tabel, harus memiliki skema yang sama untuk tiap recordnya. Contoh dari SQL seperti MySQL, PostgreSQL, dan MariaDB. Berbeda dengan NoSQL (Not Only Structured Query Language) yang merupakan bahasa untuk mengelola data secara Non Relational. Berbeda dengan SQL yang menggunakan tabel untuk menyimpan data. NoSQL memilik banyak jenis tempat untuk menyimpan data seperti Document Database, Key-Value Database, dan Graph Database. NoSQL juga tidak memiliki skema sehingga untuk menyimpan data bisa secara flexibel. Contoh dari NoSQL seperti MongoDB, Redis, Neo4j, dan Cassandra.
+
+#### 2.2.4.2 MongoDB
+
+MongoDB merupakan salah satu contoh dari NoSQL yang dikembangkan menggunakan bahasa pemrograman C++ yang rilis pertama kali pada tanggal 11 Februari 2009. MongoDB adalah salah satu contoh Document Database yang dimana tiap - tiap datanya merupakan sebuah JSON (Javascript Object Notation) atau dalam MongoDB disebut BSON (Binary JSON). Hingga saat ini, MongoDB sudah digunakan lebih dari 85 Juta pengguna diseluruh dunia dan sudah banyak perusahaan besar yang menggunakan database ini seperti EBay, Google, Adobe, dan EA. Salah satu contoh data yang terdapat di MongoDB :
+
+```Javascript
+{
+  _id : '91829jw1jooojo2',
+  firstName : 'Aris',
+  lastName : 'Akhyar',
+  age : 20
+  hobbies : ['eat', 'drink']
+}
+```
+
+### 2.2.5 Jurnal
+
+Jurnal merupakan bagian dari jenis terbitan berseri yang ada diperpustakaan, adapun pengertian jurnal menurut High Beam “Journal is the collection and periodic publication or transmission of news and the result of research through media”, artinya bahwa jurnal merupakan suatu koleksi dan terbitan berkala atau transmisi mengenai berita dan hasil-hasil penelitian mengenai media. Jurnal sendiri terbagi atas dua format yaitu tercetak dan digital (e-journal). Untuk format digital jurnal dikemas dalam dua format , yaitu bentuk CD-ROM dan dalam bentuk akses secara online melalui internet. E-Journal dipahami sebagai publikasi ilmiah dalam format elektronik dan mempunyai ISSN (International Standard Serial Number) yang format dokumennya biasanya PDF (Rusydi 2014).
+
+Penggunaan kata jurnal untuk berbagai bidang juga memberi arti yang bervariasi, misalnya jurnal dalam bidang ekonomi menunjukan sistem pembukuan rangkap. Jurnal dalam bidang pelayaran diartikan sebagai logbook berarti buku untuk mencatat semua kejadian selama pelayaran. Jurnal sebenarnya merupakan publikasi ilmiah yang memuat informasi tentang hasil kegiatan dalam bidang ilmu pengetahuan dan teknologi minimal harus mencakup kumpulan atau kumulasi pengetahuan baru, pengamatan empiris dan pengembangan gagasan atau usulan. Dengan demikian jurnal merupakan representasi dari pengetahuan baru tentang perkembangan ilmu pengetahuan yang dilaksanakan secara empriris dan biasanya merupakan gagasan yang terbaru.
+
+## 2.2.6 Plagiarisme
+
+Plagiarisme berasal dari bahasa Latin “plagiare” yang berarti mencuri. Plagiarisme berasal dari kata plagiat yang berarti pengambilan karangan (pendapat dan sebagainya) orang lain dan menjadikannya seolah-olah karangan (pendapat dan sebagainya) sendiri, misalnya menerbitkan karya tulis orang lain atas nama dirinya sendiri. Sehingga dapat diartikan plagiarisme merupakan tindakan mencuri gagasan hasil penelitian orang lain, untuk kemudian disajikan seolah-olah milik sendiri (Ridhatillah, 2013). Tindakan plagiarisme merupakan salah satu tindakan yang melanggar hak cipta. Hak Cipta itu sendiri merupakan hak eksklusif untuk Pencipta ataupun penerima hak buat mengumumkan ataupun perbanyak Ciptaannya ataupun membagikan izin buat itu dengan tidak kurangi pembatasan- pembatasan bagi peraturan perundang- undangan yang berlaku. Jika terjadi pelanggaran tersebut, dapat dikenai pelanggaran hak cipta dPasal 72 ayat UUHC dengan dipidana dengan pidana penjara pendek selama 1 bulan serta/ ataupun denda sangat sedikitnya Rp1.000.000,00, ataupun pidana penjara lama 7 tahun serta/ ataupun denda sangat sebanyak Rp5.000.000.000,00.
+
+## 2.2.7 Dice Similarity
+
+Dice Similarity atau Sørensen–Dice coefficient merupakan salah satu algoritma yang mengukur kesamaan antara dua set data. Algoritma ini banyak digunakan dalam validasi algoritma segmentasi gambar yang dibuat dengan AI, tetapi ini adalah konsep yang jauh lebih umum yang dapat diterapkan pada kumpulan data untuk berbagai aplikasi termasuk NLP.
+
 - Jaccard Similarity
