@@ -123,11 +123,11 @@ Jurnal merupakan bagian dari jenis terbitan berseri yang ada diperpustakaan, ada
 
 Penggunaan kata jurnal untuk berbagai bidang juga memberi arti yang bervariasi, misalnya jurnal dalam bidang ekonomi menunjukan sistem pembukuan rangkap. Jurnal dalam bidang pelayaran diartikan sebagai logbook berarti buku untuk mencatat semua kejadian selama pelayaran. Jurnal sebenarnya merupakan publikasi ilmiah yang memuat informasi tentang hasil kegiatan dalam bidang ilmu pengetahuan dan teknologi minimal harus mencakup kumpulan atau kumulasi pengetahuan baru, pengamatan empiris dan pengembangan gagasan atau usulan. Dengan demikian jurnal merupakan representasi dari pengetahuan baru tentang perkembangan ilmu pengetahuan yang dilaksanakan secara empriris dan biasanya merupakan gagasan yang terbaru.
 
-## 2.2.6 Plagiarisme
+### 2.2.6 Plagiarisme
 
 Plagiarisme berasal dari bahasa Latin “plagiare” yang berarti mencuri. Plagiarisme berasal dari kata plagiat yang berarti pengambilan karangan (pendapat dan sebagainya) orang lain dan menjadikannya seolah-olah karangan (pendapat dan sebagainya) sendiri, misalnya menerbitkan karya tulis orang lain atas nama dirinya sendiri. Sehingga dapat diartikan plagiarisme merupakan tindakan mencuri gagasan hasil penelitian orang lain, untuk kemudian disajikan seolah-olah milik sendiri (Ridhatillah, 2013). Tindakan plagiarisme merupakan salah satu tindakan yang melanggar hak cipta. Hak Cipta itu sendiri merupakan hak eksklusif untuk Pencipta ataupun penerima hak buat mengumumkan ataupun perbanyak Ciptaannya ataupun membagikan izin buat itu dengan tidak kurangi pembatasan- pembatasan bagi peraturan perundang- undangan yang berlaku. Jika terjadi pelanggaran tersebut, dapat dikenai pelanggaran hak cipta dPasal 72 ayat UUHC dengan dipidana dengan pidana penjara pendek selama 1 bulan serta/ ataupun denda sangat sedikitnya Rp1.000.000,00, ataupun pidana penjara lama 7 tahun serta/ ataupun denda sangat sebanyak Rp5.000.000.000,00.
 
-## 2.2.7 Dice Similarity
+### 2.2.7 Dice Similarity
 
 Dice Similarity atau Sørensen–Dice coefficient merupakan salah satu algoritma yang mengukur kesamaan antara dua set data. Algoritma ini banyak digunakan dalam validasi algoritma segmentasi gambar yang dibuat dengan AI, tetapi ini adalah konsep yang jauh lebih umum yang dapat diterapkan pada kumpulan data untuk berbagai aplikasi termasuk NLP.
 
