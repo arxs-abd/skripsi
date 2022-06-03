@@ -16,7 +16,7 @@ Penelitian ini dilaksanakan dari bulan Mei 2022 sampai dengan ... . Lokasi penel
 
 - Berikut use case diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity
 
-![Use Case Diagram](use_case.png)
+![Use Case Diagram](img/use_case.png)
 
 ### 3.3.2 ER Diagram
 
