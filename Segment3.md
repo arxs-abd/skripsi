@@ -35,6 +35,8 @@ Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemeta
 
 ![Flowchart Input Teks ke Dalam Database](img/flowchart_input.png)
 
+Keterangan :
+
 1. Input Teks
    Sebelum membandingkan teks yang akan ditentukan kesamaannya, terlebih dahulu dibuat sebuah repositori atau database teks yang akan digunakan sebagai pembanding nantinya. Teks yang diinput pada penelitian ini berupa file yang berformat Pdf (Portable Document Format).
 
@@ -54,6 +56,8 @@ Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemeta
 
 ![Flowchart Perbandingan Teks](img/flowchart_check.png)
 
+Keterangan :
+
 1. Input Teks
    Input teks yang akan dibandingkan kedalam sistem yang nantinya akan dibandingkan terhadap teks yang terdapat dalam database atau repositori. Teks yang diinput berupa teks yang berformat Pdf (Portable Document Format).
 
@@ -70,6 +74,10 @@ Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemeta
    Setelah teks melewati tahap sebelumnya, maka teks akan dibandingan dengan semua teks yang terdapat didalam database atau repositori. Teks akan dibandingkan dengan semua data teks dengan menggunakan metode Dice Similarity. Kemudian hasil kemiripan antar teks akan muncul sebanyak data yang terdapat dalam database atau repositori teks.
 
 ## 3.3 Metode Penelitian
+
+Dalam sistem ini, metode perhitungan yang digunakan adalam metode Dice Similarity dengan membandingkan data teks yang diinput pengguna dengan teks yang terdapat didalam database atau repositori teks. Algoritma perhitungan persentase kemiripan antar teks sebagai berikut :
+
+1.
 
 ## 3.3 Instrumen Penelitian
 
