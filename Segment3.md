@@ -33,6 +33,8 @@ Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemeta
 
 #### 3.3.3.1 Algoritma Input Teks ke Dalam Database
 
+![Flowchart Input Teks ke Dalam Database](img/flowchart%20input.png)
+
 1. Input Teks
    Sebelum membandingkan teks yang akan ditentukan kesamaannya, terlebih dahulu dibuat sebuah repositori atau database teks yang akan digunakan sebagai pembanding nantinya. Teks yang diinput pada penelitian ini berupa file yang berformat Pdf (Portable Document Format).
 
@@ -49,6 +51,8 @@ Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemeta
    Setelah teks telah melewati tahap sebelumnya, maka teks akan dimasukkan kedalam database yang nantinya akan digunakan saat ingin mendapatkan persentase kemiripan dari teks yang akan dibandingkan nantinya.
 
 #### 3.3.3.2 Algoritma Perbandingan Teks
+
+![Flowchart Perbandingan Teks](img/flowchart%20check.png)
 
 1. Input Teks
    Input teks yang akan dibandingkan kedalam sistem yang nantinya akan dibandingkan terhadap teks yang terdapat dalam database atau repositori. Teks yang diinput berupa teks yang berformat Pdf (Portable Document Format).
