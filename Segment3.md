@@ -19,13 +19,15 @@ Prosedur Penelitian merupakan serangkaian kegiatan yang dilaksanakan secara sist
 
 ### 3.2.1 Use Case Diagram
 
-Use Case Diagram adalah suatu jenis diagram yang menggambarkan hubungan atau interaksi dari sebuah sistem dengan pengguna. Dengan adanya Use Diagram, kita dapat mendeskripsikan tipe atau jenis yang dilakukan pengguna terhadap sebuah sistem. Berikut use case diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity
+Use Case Diagram adalah suatu jenis diagram yang menggambarkan hubungan atau interaksi dari sebuah sistem dengan pengguna. Dengan adanya Use Diagram, kita dapat mendeskripsikan tipe atau jenis yang dilakukan pengguna terhadap sebuah sistem. Berikut use case diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity.
 
 ![Use Case Diagram](img/use_case.png)
 
 ### 3.3.2 ER Diagram
 
-Berikut ER diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity
+Entity Relationship Diagram (ERD) adalah suatu jenis diagram yang digunakan untuk merancang suatu basis data (database). Dalam ERD, terdapat beberapa komponen seperti entitas, relasi, atribut, dan garis penghubung dimana digunakan untuk memperlihatkan hubungan atau relasi antar entitas atau objek yang terlihat beserta atributnya. Berikut ER diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity.
+
+![Entity RRelationship Diagram](img/erd.png)
 
 ## 3.3 Metode Penelitian
 
