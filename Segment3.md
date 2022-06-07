@@ -31,6 +31,21 @@ Entity Relationship Diagram (ERD) adalah suatu jenis diagram yang digunakan untu
 
 Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemetasikan. Dengan adanya desain sistem ini, dapat memberikan gambaran rancang bangun yang lengkap terhadap pengguna dari sistem ini.
 
+1. Input Teks
+   Sebelum membandingkan teks yang akan ditentukan kesamaannya, terlebih dahulu dibuat sebuah repositori atau database teks yang akan digunakan sebagai pembanding nantinya. Teks yang diinput pada penelitian ini berupa file yang berformat Pdf (Portable Document Format).
+
+2. Konversi Teks
+   Teks yang telah diinput, kemudian diubah kedalam bentuk tipe data _String_ agar dapat diolah nantinya didalam sistem.
+
+3. Hapus Stopword
+   Stopword merupakan kata yang diabaikan karena memeiliki frekuensi kemunculan yang sangat tinggi dan tidak mempunyai arti. Beberapa contoh Stopw word seperti, "atau", "dan", dan "tapi". Dengan menghapus Stopword, sistem dapat bekerja lebih cepat karena Stopword akan menghapus kata yang abaikan.
+
+4. Hapus Karakter
+   Selain Stopword, karakter seperti ",", ".", "?", dll yang hanya berupa karakter yang tidak memiliki arti dan fungsi karena sistem hanya memeriksa kata.
+
+5. Simpan di Database
+   Setelah teks telah melewati tahap sebelumnya, maka teks akan dimasukkan kedalam database yang nantinya akan digunakan saat ingin mendapatkan persentase kemiripan dari teks yang akan dibandingkan nantinya.
+
 ## 3.3 Metode Penelitian
 
 ## 3.3 Instrumen Penelitian
