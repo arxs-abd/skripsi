@@ -1,5 +1,3 @@
-# Rancang Bangun Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity
-
 # 3. Metode Penelitian
 
 ## 3.1 Prosedur Penelitian

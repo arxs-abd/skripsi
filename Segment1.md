@@ -1,5 +1,3 @@
-# Rancang Bangun Sistem Mendeteksi Kesamaan Teks Menggunakan Metode N-Grams dan Jaccard Similiratiy
-
 # 1. Pendahuluan
 
 ## 1.1 Latar Belakang
