@@ -15,35 +15,32 @@
   Untuk mengurangi hal tersebut, dapat dilakukan beberapa metode untuk mencegah plagiarisme seperti menggunakan cara manual ataupun menggunakan teknologi yang ada. Jika menggunakan cara manual, dilakukan dengan membandingkan sebuah dokumen yang akan dicek dengan dokumen yang akan dijadikan perbandingan dengan melihat kata yang digunakan ataupun tata penulisan dokumen tersebut. Cara ini kurang efektif karena jumlah dokumen yang akan dijadikan perbandingan jumlah tidak sedikit bisa mencapai ratusan bahkan ribuan dokumen lebih. Sedangkan untuk cepat menggunakan menggunakan mesin sebagi pembanding.
 
 - Metode
-  Ada beberapa metode yang dapat digunakan seperti Cosine Similarity, TF-IDF, Jaccard Similarity, Dice Similarity, Word2Vec dan sebagainya. Dengan menggunakan salah satu metode diatas, dapat temukan persentase kesamaan sebuah dokument. Salah satu metode yang dapat digunakan yaitu dengan metode Jaccard Coefficient. Jaccard Coefficient merupakan salah satu metode perbandingan antara dokumen dengan membandingkan kata yang ada diantara dokumen tersebut. Dengan adanya penelitian ini, diharapkan dapat membangun sebuah Sistem Informasi berbasis Web yang mampu memberikan persentase kesamaan dari sebuah dokumen terhadap dokumen lainnya yang terdapat didalam database guna mengurangi tindak plagiarisme yang sering terjadi saat ini.
+  Ada beberapa metode yang dapat digunakan seperti Cosine Similarity, TF-IDF, Jaccard Similarity, Dice Similarity, Word2Vec dan sebagainya. Dengan menggunakan salah satu metode diatas, dapat temukan persentase kesamaan sebuah dokument. Salah satu metode yang dapat digunakan yaitu dengan metode Dice Similarity. Dice Similarity merupakan salah satu metode perbandingan antara dokumen dengan membandingkan kata yang ada diantara dokumen tersebut. Dengan adanya penelitian ini, diharapkan dapat membangun sebuah Sistem Informasi berbasis Web yang mampu memberikan persentase kesamaan dari sebuah dokumen terhadap dokumen lainnya yang terdapat didalam database guna mengurangi tindak plagiarisme yang sering terjadi saat ini.
 
 ## 1.2 Rumusan Masalah
 
 Adapun beberapa point yang menjadi rumusan masalah penelitian ini yaitu :
 
-1. Bagaimana merancang sebuah sistem informasi berbasis web menggunakan metode Jaccard Similarity ?
-2. Bagaimana mengimplementasikan metode Jaccard Coeffient ?
-3. Bagaimana mengukur kesamaan dari sebuah dokumen dengan dokumen lainnya menggunakan metode Jaccard Coefficient ?
+1. Bagaimana merancang sebuah sistem informasi berbasis web menggunakan metode Dice Similarity ?
+2. Bagaimana mengimplementasikan metode Dice Similarity ?
+3. Bagaimana mengukur kesamaan dari sebuah dokumen dengan dokumen lainnya menggunakan metode Dice Similarity ?
 
 ## 1.3 Tujuan Penelitian
 
 Adapun beberapa point yang menjadi tujuan penelitian ini yaitu :
 
-1. Merancang sebuah sistem informasi berbasis web menggunakan metode Jaccard Similarity.
-2. Mengimplementasikan metode Jaccard Coefficient.
-3. Mengukur kesamaan dari sebuah dokumen dengan dokumen lainnya menggunakan metode Jaccard Coefficient.
+1. Merancang sebuah sistem informasi berbasis web menggunakan metode Dice Similarity.
+2. Mengimplementasikan metode Dice Similarity.
+3. Mengukur kesamaan dari sebuah dokumen dengan dokumen lainnya menggunakan metode Dice Similarity.
 
 ## 1.4 Manfaat Penelitian
 
-Penelitian ini merupakan mengimplimentasian metode Jaccard Coeffient pada sebuah sistem informasi berbasis web guna mengetahui persentase kesamaan sebuah dokumen dengan dokumen lainnya sehungga dapat digunakan untuk mengurangi tindak plagiarisme dengan mudah.
+Penelitian ini merupakan mengimplimentasian metode Dice Similarity pada sebuah sistem informasi berbasis web guna mengetahui persentase kesamaan sebuah dokumen dengan dokumen lainnya sehungga dapat digunakan untuk mengurangi tindak plagiarisme dengan mudah.
 
 ## 1.5 Batasan Masalah
 
 Adapaun beberapa batasan masalah pada penelitian ini yaitu :
 
-1. Sistem ini dibuat menggunakan bahasa pemrograman Javascript dengan runtime environment Nodejs, framework Express JS, dengan database MongoDB
-2. Menggunakan data berupa jurnal mengenai ilmu komputer yang memiliki ekstensi pdf
-3. Menggunakan metode Jaccard Similarity
-
-Referensi
-Banyak
+1. Sistem ini dibuat menggunakan bahasa pemrograman Javascript dengan runtime environment Nodejs, framework Express JS, dengan database MongoDB.
+2. Menggunakan data berupa jurnal yang diinput oleh user dan memiliki ekstensi pdf.
+3. Menggunakan metode Dice Similarity Similarity.
