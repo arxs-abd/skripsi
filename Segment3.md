@@ -27,6 +27,10 @@ Entity Relationship Diagram (ERD) adalah suatu jenis diagram yang digunakan untu
 
 ![Entity RRelationship Diagram](img/erd.png)
 
+### 3.3.3 Desain Sistem
+
+Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemetasikan. Dengan adanya desain sistem ini, dapat memberikan gambaran rancang bangun yang lengkap terhadap pengguna dari sistem ini.
+
 ## 3.3 Metode Penelitian
 
 ## 3.3 Instrumen Penelitian
