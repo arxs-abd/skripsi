@@ -31,6 +31,8 @@ Entity Relationship Diagram (ERD) adalah suatu jenis diagram yang digunakan untu
 
 Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemetasikan. Dengan adanya desain sistem ini, dapat memberikan gambaran rancang bangun yang lengkap terhadap pengguna dari sistem ini.
 
+#### 3.3.3.1 Algoritma Input Teks ke Dalam Database
+
 1. Input Teks
    Sebelum membandingkan teks yang akan ditentukan kesamaannya, terlebih dahulu dibuat sebuah repositori atau database teks yang akan digunakan sebagai pembanding nantinya. Teks yang diinput pada penelitian ini berupa file yang berformat Pdf (Portable Document Format).
 
@@ -45,6 +47,23 @@ Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemeta
 
 5. Simpan di Database
    Setelah teks telah melewati tahap sebelumnya, maka teks akan dimasukkan kedalam database yang nantinya akan digunakan saat ingin mendapatkan persentase kemiripan dari teks yang akan dibandingkan nantinya.
+
+#### 3.3.3.2 Algoritma Perbandingan Teks
+
+1. Input Teks
+   Input teks yang akan dibandingkan kedalam sistem yang nantinya akan dibandingkan terhadap teks yang terdapat dalam database atau repositori.
+
+2. Konversi Teks
+   Teks yang telah diinput, kemudian diubah kedalam bentuk tipe data _String_ agar dapat diolah nantinya didalam sistem.
+
+3. Hapus Stopword
+   Stopword merupakan kata yang diabaikan karena memeiliki frekuensi kemunculan yang sangat tinggi dan tidak mempunyai arti. Beberapa contoh Stopw word seperti, "atau", "dan", dan "tapi". Dengan menghapus Stopword, sistem dapat bekerja lebih cepat karena Stopword akan menghapus kata yang abaikan.
+
+4. Hapus Karakter
+   Selain Stopword, karakter seperti ",", ".", "?", dll yang hanya berupa karakter yang tidak memiliki arti dan fungsi karena sistem hanya memeriksa kata.
+
+5. Hitung Nilai Kemiripan
+   Setelah teks melewati tahap sebelumnya, maka teks akan dibandingan dengan semua teks yang terdapat didalam database atau repositori. Teks akan dibandingkan dengan semua data teks dengan menggunakan metode Dice Similarity. Kemudian hasil kemiripan antar teks akan muncul sebanyak data yang terdapat dalam database atau repositori teks.
 
 ## 3.3 Metode Penelitian
 
