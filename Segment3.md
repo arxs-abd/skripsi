@@ -51,7 +51,7 @@ Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemeta
 #### 3.3.3.2 Algoritma Perbandingan Teks
 
 1. Input Teks
-   Input teks yang akan dibandingkan kedalam sistem yang nantinya akan dibandingkan terhadap teks yang terdapat dalam database atau repositori.
+   Input teks yang akan dibandingkan kedalam sistem yang nantinya akan dibandingkan terhadap teks yang terdapat dalam database atau repositori. Teks yang diinput berupa teks yang berformat Pdf (Portable Document Format).
 
 2. Konversi Teks
    Teks yang telah diinput, kemudian diubah kedalam bentuk tipe data _String_ agar dapat diolah nantinya didalam sistem.
