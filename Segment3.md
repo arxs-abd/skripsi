@@ -79,6 +79,18 @@ Dalam sistem ini, metode perhitungan yang digunakan adalam metode Dice Similarit
 
 ![Flowchart Dice Similarity](img/algo_dice_similarity.png)
 
+1. Persiapan Data.
+   Sebelum dilakukan perhitungan, data dipsiapkan terlebih dahulu, dimana data input teks merupakan data yang akan dibandingkan dengan data teks yang terdapat didalam database atau repositori.
+
+2. Pembuatan Kamus Data.
+   Untuk mempermudah perhitungan Dice Similarity, dilakukan pembuatan kamus data yang berisi kata yang terdapat didalam input teks maupun data teks yang berasal dari database atau repositori. Pada awal tahap ini, dilakukan perulangan sebanyak kata yang terdapat didalam input teks kemudian dilakukan penngkondisian jika didalam kamus kata tidak terdapat index yang sama dengan kata, maka kata tersebut ditambahkan kedalam kamus. Setelah itu, dilakukan perulangan terhadap data dalam database atau repositori kemudian dilakukan perulangan kembali sebanyak kata yang terdapat didalam teks dan dilakukan hal yang sama dengan input teks diawal.
+
+3. Perhitungan Jumlah Kata di Dalam Kamus Data.
+   Sebelum dilakukan perhitungan, terlebih dahulu ditentukan jumlah kata yang terdapat didalam teks untuk data teks input dan data teks dari database. Pada awal tahap ini, dilakukan perulangan sebanyak kata yang terdapat didalam input teks kemudian dilakukan penngkondisian jika didalam kamus kata terdapat kata yang sama dengan kata yang terdapat di kamus kata, maka kata untuk indek input teks akan bertambah satu. dilakukan perulangan terhadap data dalam database atau repositori kemudian dilakukan perulangan kembali sebanyak kata yang terdapat didalam teks dan dilakukan hal yang sama dengan input teks diawal.
+
+4. Perhitungan Kemiripan Menggunakan Metode Dice Similarity.
+   Setelah memperoleh kamus data, maka akan dilakukan perhitungan untuk memberikan persentase kemiripan antara input teks dan data teks yang berasal dari database. Ditahap ini dilakukan perulangan sebanyak data dalam database. Kemudian dilakukan perhitungan sesuai dengan rumus dari Dice Similarity kemudian hasilnya akan ditampilkan.
+
 ## 3.3 Instrumen Penelitian
 
 Instrumen yang digunakan dalam penelitian ini adalah laptop dengan processor AMD Athlon 300U with Radeon Vega Mobile Gfx 2.40 GHz dan RAM sebanyak 8 GB serta sistem operasi windows 10 Home 64 bit.
