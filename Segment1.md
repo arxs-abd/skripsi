@@ -42,5 +42,5 @@ Penelitian ini merupakan mengimplimentasian metode Dice Similarity pada sebuah s
 Adapaun beberapa batasan masalah pada penelitian ini yaitu :
 
 1. Sistem ini dibuat menggunakan bahasa pemrograman Javascript dengan runtime environment Nodejs, framework Express JS, dengan database MongoDB.
-2. Menggunakan data berupa jurnal yang diinput oleh user dan memiliki ekstensi pdf.
+2. Menggunakan data berupa jurnal yang diinput oleh user dan memiliki ekstensi pdf (Portable Document Format).
 3. Menggunakan metode Dice Similarity Similarity.
