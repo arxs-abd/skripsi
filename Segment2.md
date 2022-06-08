@@ -128,5 +128,3 @@ Plagiarisme berasal dari bahasa Latin “plagiare” yang berarti mencuri. Plagi
 ### 2.2.7 Dice Similarity
 
 Dice Similarity atau Sørensen–Dice coefficient merupakan salah satu algoritma yang mengukur kesamaan antara dua set data. Algoritma ini banyak digunakan dalam validasi algoritma segmentasi gambar yang dibuat dengan AI, tetapi ini adalah konsep yang jauh lebih umum yang dapat diterapkan pada kumpulan data untuk berbagai aplikasi termasuk NLP.
-
-- Jaccard Similarity
