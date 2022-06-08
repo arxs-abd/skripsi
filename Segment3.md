@@ -25,7 +25,7 @@ Use Case Diagram adalah suatu jenis diagram yang menggambarkan hubungan atau int
 
 Entity Relationship Diagram (ERD) adalah suatu jenis diagram yang digunakan untuk merancang suatu basis data (database). Dalam ERD, terdapat beberapa komponen seperti entitas, relasi, atribut, dan garis penghubung dimana digunakan untuk memperlihatkan hubungan atau relasi antar entitas atau objek yang terlihat beserta atributnya. Berikut ER diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity.
 
-![Entity RRelationship Diagram](img/erd.png)
+![Entity Relationship Diagram](img/erd.png)
 
 ### 3.3.3 Desain Sistem
 
@@ -77,7 +77,7 @@ Keterangan :
 
 Dalam sistem ini, metode perhitungan yang digunakan adalam metode Dice Similarity dengan membandingkan data teks yang diinput pengguna dengan teks yang terdapat didalam database atau repositori teks. Algoritma perhitungan persentase kemiripan antar teks sebagai berikut :
 
-1.
+![Flowchart Dice Similarity](img/algo_dice_similarity.png)
 
 ## 3.3 Instrumen Penelitian
 
