@@ -21,17 +21,17 @@ Use Case Diagram adalah suatu jenis diagram yang menggambarkan hubungan atau int
 
 ![Use Case Diagram](img/use_case.png)
 
-### 3.3.2 ER Diagram
+### 3.2.2 ER Diagram
 
 Entity Relationship Diagram (ERD) adalah suatu jenis diagram yang digunakan untuk merancang suatu basis data (database). Dalam ERD, terdapat beberapa komponen seperti entitas, relasi, atribut, dan garis penghubung dimana digunakan untuk memperlihatkan hubungan atau relasi antar entitas atau objek yang terlihat beserta atributnya. Berikut ER diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity.
 
 ![Entity Relationship Diagram](img/erd.png)
 
-### 3.3.3 Desain Sistem
+### 3.2.3 Desain Sistem
 
 Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemetasikan. Dengan adanya desain sistem ini, dapat memberikan gambaran rancang bangun yang lengkap terhadap pengguna dari sistem ini.
 
-#### 3.3.3.1 Algoritma Input Teks ke Dalam Database
+#### 3.2.3.1 Algoritma Input Teks ke Dalam Database
 
 ![Flowchart Input Teks ke Dalam Database](img/flowchart_input.png)
 
@@ -52,7 +52,7 @@ Keterangan :
 5. Simpan di Database
    Setelah teks telah melewati tahap sebelumnya, maka teks akan dimasukkan kedalam database yang nantinya akan digunakan saat ingin mendapatkan persentase kemiripan dari teks yang akan dibandingkan nantinya.
 
-#### 3.3.3.2 Algoritma Perbandingan Teks
+#### 3.2.3.2 Algoritma Perbandingan Teks
 
 ![Flowchart Perbandingan Teks](img/flowchart_check.png)
 
@@ -91,6 +91,6 @@ Dalam sistem ini, metode perhitungan yang digunakan adalam metode Dice Similarit
 4. Perhitungan Kemiripan Menggunakan Metode Dice Similarity.
    Setelah memperoleh kamus data, maka akan dilakukan perhitungan untuk memberikan persentase kemiripan antara input teks dan data teks yang berasal dari database. Ditahap ini dilakukan perulangan sebanyak data dalam database. Kemudian dilakukan perhitungan sesuai dengan rumus dari Dice Similarity kemudian hasilnya akan ditampilkan.
 
-## 3.3 Instrumen Penelitian
+## 3.4 Instrumen Penelitian
 
 Instrumen yang digunakan dalam penelitian ini adalah laptop dengan processor AMD Athlon 300U with Radeon Vega Mobile Gfx 2.40 GHz dan RAM sebanyak 8 GB serta sistem operasi windows 10 Home 64 bit.
