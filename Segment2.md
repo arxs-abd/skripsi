@@ -87,7 +87,7 @@ Javascript adalah sebuah bahasa pemrograman tingkat tinggi yang dinamis, scripti
 
 #### 2.2.3.2 NodeJS
 
-Node.js adalah runtime environment untuk JavaScript yang bersifat open-source dan cross-platform. Dengan Node.js kita dapat menjalankan kode JavaScript di mana pun, tidak hanya terbatas pada lingkungan browser. Seperti diketahui bahawa Javascript hanya dapat berjalan pada sebuah web browser, kemudian Ryan Dahl, membuat sebuah runtime environment dengan mengeluarkan engine Javasscript dari Chrome yaitu V8 Javascript Engine menggunakan bahaasa C agar Javascript dapat dijalankan diluar browser. Akhirnya tercipta NodeJS pada tahun 2009. Dengan Begitu, Javascript yang sebelumnya hanya bisa di client side dengan adanya NodeJS bisa juga di server side. Beberapa fitur yang terdapat di NodeJS seperti Asynchronous & Event-driven, Single Threaded but Highly Scalable.
+Node.js adalah runtime environment untuk JavaScript yang bersifat open-source dan cross-platform. Dengan Node.js kita dapat menjalankan kode JavaScript di mana pun, tidak hanya terbatas pada lingkungan browser. Seperti diketahui bahwa Javascript hanya dapat berjalan pada sebuah web browser, kemudian Ryan Dahl, membuat sebuah runtime environment dengan mengeluarkan engine Javasscript dari Chrome yaitu V8 Javascript Engine menggunakan bahaasa C agar Javascript dapat dijalankan diluar browser. Akhirnya tercipta NodeJS pada tahun 2009. Dengan Begitu, Javascript yang sebelumnya hanya bisa di client side dengan adanya NodeJS bisa juga di server side. Beberapa fitur yang terdapat di NodeJS seperti Asynchronous & Event-driven, Single Threaded but Highly Scalable.
 
 #### 2.2.3.3 Express JS
 
@@ -127,4 +127,8 @@ Plagiarisme berasal dari bahasa Latin “plagiare” yang berarti mencuri. Plagi
 
 ### 2.2.7 Dice Similarity
 
-Dice Similarity atau Sørensen–Dice coefficient merupakan salah satu algoritma yang mengukur kesamaan antara dua set data. Algoritma ini banyak digunakan dalam validasi algoritma segmentasi gambar yang dibuat dengan AI, tetapi ini adalah konsep yang jauh lebih umum yang dapat diterapkan pada kumpulan data untuk berbagai aplikasi termasuk NLP.
+Dice Similarity atau Sørensen–Dice coefficient merupakan salah satu algoritma yang mengukur kesamaan antara dua set data. Algoritma ini banyak digunakan dalam validasi algoritma segmentasi gambar yang dibuat dengan AI, tetapi ini adalah konsep yang jauh lebih umum yang dapat diterapkan pada kumpulan data untuk berbagai aplikasi termasuk NLP. Pada awalnya, penggunaan rumus dari Dice Similarity menggunakan dua set data diskrit X dan Y yaitu :
+
+Kemudian jika menggunakan data boolean, maka menggunakan definisi True Positive (TP), False Positive (FP), and False Negative (FN) dengan rumus yaitu :
+
+Jika menggunakan data vector, dengan A dan B sebagai vector, maka rumusnya yaitu :
