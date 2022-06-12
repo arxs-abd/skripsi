@@ -21,7 +21,9 @@ Use Case Diagram adalah suatu jenis diagram yang menggambarkan hubungan atau int
 
 ![Use Case Diagram](img/use_case.png)
 
-### 3.2.2 ER Diagram
+Dalam use case diagram digambar, terdapat 3 jenis user yang akan menggunakan sistem ini yaitu Admin, User, dan Guest. Admin memiliki akses terhadap semua sistem baik manajemen dari user, dan juga manajemen data yang disimpan dalam database. Untuk user, hanya memiliki akses terhadap data yang disimpan kedalam database nantinya berdasarkan yang dimiliki oleh user. Selain itu, user juga dapat menggunakan sistem pendeteksi kesamaan dokumen yang ada dalam sistem ini. Sedangkan guest atau tamu hanya bisa meakukan pendeteksi kesamaan dokument dan tidak bisa melakukan manajemen data yang ada didalam database.
+
+### 3.2.2 Entity Relationship Diagram (ERD)
 
 Entity Relationship Diagram (ERD) adalah suatu jenis diagram yang digunakan untuk merancang suatu basis data (database). Dalam ERD, terdapat beberapa komponen seperti entitas, relasi, atribut, dan garis penghubung dimana digunakan untuk memperlihatkan hubungan atau relasi antar entitas atau objek yang terlihat beserta atributnya. Berikut ER diagram dari Sistem Pendeteksi Kesamaan Teks Menggunakan Metode Dice Similarity.
 
