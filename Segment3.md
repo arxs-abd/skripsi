@@ -29,6 +29,8 @@ Entity Relationship Diagram (ERD) adalah suatu jenis diagram yang digunakan untu
 
 ![Entity Relationship Diagram](img/erd.png)
 
+Berdasarkan ERD di atas, terdapat dua entitas yaitu User dan Files, dimana User memiliki beberapa atribut yaitu \_id, name, password, uid, password, dan created_at. Sedangkan Files memiliki beberapa atribut juga sepeerti \_id, name, filename, uploader, dan text. Tabel User mempunya relasi One to Many terhadap Tabel Files, sedangakan sebaliknya yaitu Tabel Files memiliki relasi One to One terhadap Tabel User.
+
 ### 3.2.3 Desain Sistem
 
 Pada bagian ini, akan menjelaskan bagaimana desain suatu sistem yang diimplemetasikan. Dengan adanya desain sistem ini, dapat memberikan gambaran rancang bangun yang lengkap terhadap pengguna dari sistem ini.
