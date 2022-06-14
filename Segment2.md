@@ -95,7 +95,7 @@ Menurut Website resmi dari Express JS adalah 'Fast, unopinionated, minimalist we
 
 ### 2.2.4 Database
 
-Database atau basis data adalah kumpulan informasi yang disimpan di dalam komputer secara sistematik sehingga dapat diperiksa menggunakan suatu program komputer untuk memperoleh informasi dari basis data tersebut (Andry Andaru). Berdasarkan definisi database, database berfungsi untuk menyimpan catatan atau sebuah data pada sebuah penyimpanan yang kemudian akan digunakan pada waktu lainnya. Pada umumnya, database sudah pasti memiliki key dan value, walaupun istilah ini berbeda ditiap tiap jenis database yang ada. Adapun beberapa jenis database seperti Operational Database, Database Warehouse, Distributed Database, Relational Database, dan End User Database.
+Database atau basis data adalah kumpulan informasi yang disimpan di dalam komputer secara sistematik sehingga dapat diperiksa menggunakan suatu program komputer untuk memperoleh informasi dari basis data tersebut (Andry Andaru, 2018). Berdasarkan definisi database, database berfungsi untuk menyimpan catatan atau sebuah data pada sebuah penyimpanan yang kemudian akan digunakan pada waktu lainnya. Pada umumnya, database sudah pasti memiliki key dan value, walaupun istilah ini berbeda ditiap tiap jenis database yang ada. Adapun beberapa jenis database seperti Operational Database, Database Warehouse, Distributed Database, Relational Database, dan End User Database.
 
 #### 2.2.4.1 SQL dan NoSQL
 
