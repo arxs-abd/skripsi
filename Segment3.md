@@ -170,9 +170,9 @@ Untuk mempermudah perhitungan, dilakukan beberapa penambahan row dan field sehin
 
 Setelah memperoleh table diatas, kemudian nilai tersebut dimasukkan kedalam rumus Dice Similarity sehingga menjadi :
 
-![Dice Similarity 3.4](<https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;.&space;(X&space;.&space;Y)}{|X|^2&space;+&space;|Y|^2}>)
-![Dice Similarity 3.5](https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;.&space;11}{16&space;+&space;22})
-![Dice Similarity 3.6](https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{22}{38})
+![Dice Similarity 3.4](<https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;.&space;(X&space;.&space;Y)}{|X|^2&space;+&space;|Y|^2}>)  
+![Dice Similarity 3.5](https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;.&space;11}{16&space;+&space;22})  
+![Dice Similarity 3.6](https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{22}{38})  
 ![Dice Similarity 3.6](https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;0,5789473684)
 
 Sehingga diperoleh nilai Dice Similarity adalah 0,5789473684 atau jika dipersentasekan menjadi 57, 8 %. Jadi, Persentase kesamaan antara antara Data X dengan Data Y adalah sebesar 57, 8 %
