@@ -101,7 +101,7 @@ Algoritma perhitungan persentase kemiripan antar teks sebagai berikut :
 
 ### 3.3.2 Implementasi Dice Similarity
 
-Untuk pengimplementasian dari Metode Cosine Similarity, diambil contoh dari definisi dari komputer menurut para ahli yaitu Menurut Robert H. Blissmer komputer adalah suatu alat elektronik yang mampu melakukan beberapa tugas seperti menerima input, memproses input tadi sesuai dengan programnya, menyimpan perintah-perintah dan hasil pengolahan, serta menyediakan output dalam bentuk informasi. Sedangkan menurut Arief Susanto, komputer adalah sekelompok alat elektronik yang terdiri atas perintah input, alat yang mengolah input, dan peralatan output yang memberikan informasi serta bekerja secara otomatis. (Susanto, 2009).
+Untuk pengimplementasian dari Metode Cosine Similarity, diambil contoh dari definisi dari komputer menurut para ahli yaitu Menurut Robert H. Blissmer _komputer adalah suatu alat elektronik yang mampu melakukan beberapa tugas seperti menerima input, memproses input tadi sesuai dengan programnya, menyimpan perintah-perintah dan hasil pengolahan, serta menyediakan output dalam bentuk informasi_. Sedangkan menurut Arief Susanto, _komputer adalah sekelompok alat elektronik yang terdiri atas perintah input, alat yang mengolah input, dan peralatan output yang memberikan informasi serta bekerja secara otomatis_. (Susanto, 2009).
 
 Setelah mendapatkan kedua data diatas, kemudian dilakukan pembagian. Untuk pengertian dari Robert H. Blissmer akan menjadi data dari database sebagai X, kemudian untuk pengertian dari Arief Susanto akan menjadi data yang akan dibandingkan dengan data dari database sebagai Y. Sebelum diolah, kedua data diatas akan dilakukan penghapusan Stopword dan karaktek yang tidak berguna dalam perhitungan nantinya sehingga menjadi :
 
@@ -145,27 +145,27 @@ Kemudian kedua vektor diatas dimasukkan kedalam rumus Dice Similarity Sehingga M
 
 Untuk mempermudah perhitungan, dilakukan beberapa penambahan row dan field sehingga menjadi :
 
-| Kamus Data  | Data X | Data Y | X.Y    | X^2^   | Y^2^   |
-| ----------- | ------ | ------ | ------ | ------ | ------ |
-| alat        | 2      | 1      | 2      | 4      | 1      |
-| bentuk      | 0      | 1      | 0      | 0      | 1      |
-| elektronik  | 1      | 1      | 1      | 1      | 1      |
-| hasil       | 0      | 1      | 0      | 0      | 1      |
-| infromasi   | 1      | 1      | 1      | 1      | 1      |
-| input       | 2      | 2      | 4      | 4      | 4      |
-| memproses   | 0      | 1      | 0      | 0      | 1      |
-| menerima    | 0      | 1      | 0      | 0      | 1      |
-| mengolah    | 1      | 0      | 0      | 1      | 0      |
-| menyediakan | 0      | 1      | 0      | 0      | 1      |
-| menyimpan   | 0      | 1      | 0      | 0      | 1      |
-| otomatis    | 1      | 0      | 0      | 1      | 0      |
-| output      | 1      | 1      | 1      | 1      | 1      |
-| perintah    | 1      | 2      | 2      | 1      | 4      |
-| perlatan    | 1      | 0      | 0      | 1      | 0      |
-| programnya  | 0      | 1      | 0      | 0      | 1      |
-| sekelompok  | 1      | 0      | 0      | 1      | 0      |
-| sesuai      | 0      | 1      | 0      | 0      | 1      |
-| tugas       | 0      | 1      | 0      | 0      | 1      |
+| Kamus Data  | Data X | Data Y |  X.Y   |  X^2   |  Y^2   |
+| ----------- | :----: | :----: | :----: | :----: | :----: |
+| alat        |   2    |   1    |   2    |   4    |   1    |
+| bentuk      |   0    |   1    |   0    |   0    |   1    |
+| elektronik  |   1    |   1    |   1    |   1    |   1    |
+| hasil       |   0    |   1    |   0    |   0    |   1    |
+| infromasi   |   1    |   1    |   1    |   1    |   1    |
+| input       |   2    |   2    |   4    |   4    |   4    |
+| memproses   |   0    |   1    |   0    |   0    |   1    |
+| menerima    |   0    |   1    |   0    |   0    |   1    |
+| mengolah    |   1    |   0    |   0    |   1    |   0    |
+| menyediakan |   0    |   1    |   0    |   0    |   1    |
+| menyimpan   |   0    |   1    |   0    |   0    |   1    |
+| otomatis    |   1    |   0    |   0    |   1    |   0    |
+| output      |   1    |   1    |   1    |   1    |   1    |
+| perintah    |   1    |   2    |   2    |   1    |   4    |
+| perlatan    |   1    |   0    |   0    |   1    |   0    |
+| programnya  |   0    |   1    |   0    |   0    |   1    |
+| sekelompok  |   1    |   0    |   0    |   1    |   0    |
+| sesuai      |   0    |   1    |   0    |   0    |   1    |
+| tugas       |   0    |   1    |   0    |   0    |   1    |
 | **Total**   | **12** | **18** | **11** | **16** | **22** |
 
 Setelah memperoleh table diatas, kemudian nilai tersebut dimasukkan kedalam rumus Dice Similarity sehingga menjadi :
