@@ -95,6 +95,14 @@ Dalam sistem ini, metode perhitungan yang digunakan adalam metode Dice Similarit
 4. Perhitungan Kemiripan Menggunakan Metode Dice Similarity.
    Setelah memperoleh kamus data, maka akan dilakukan perhitungan untuk memberikan persentase kemiripan antara input teks dan data teks yang berasal dari database. Ditahap ini dilakukan perulangan sebanyak data dalam database. Kemudian dilakukan perhitungan sesuai dengan rumus dari Dice Similarity kemudian hasilnya akan ditampilkan.
 
+   Untuk pengimplementasian dari Metode Cosine Similarity, diambil contoh dari definisi dari komputer menurut para ahli yaitu Menurut Robert H. Blissmer komputer adalah suatu alat elektronik yang mampu melakukan beberapa tugas seperti menerima input, memproses input tadi sesuai dengan programnya, menyimpan perintah-perintah dan hasil pengolahan, serta menyediakan output dalam bentuk informasi. Sedangkan menurut Arief Susanto, komputer adalah sekelompok alat elektronik yang terdiri atas perintah input, alat yang mengolah input, dan peralatan output yang memberikan informasi serta bekerja secara otomatis. (Susanto, 2009).
+
+   Setelah mendapatkan kedua data diatas, kemudian dilakukan pembagian. Untuk pengertian dari Robert H. Blissmer akan menjadi data dari database sebagai X, kemudian untuk pengertian dari Arief Susanto akan menjadi data yang akan dibandingkan dengan data dari database sebagai Y. Sebelum diolah, kedua data diatas akan dilakukan penghapusan Stopword dan karaktek yang tidak berguna dalam perhitungan nantinya sehingga menjadi :
+
+   | Data X                                                                                                                                                  | Data Y                                                                                            |
+   | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+   | alat elektronik tugas menerima input memproses input sesuai programnya menyimpan perintah-perintah hasil pengolahan menyediakan output bentuk informasi | sekelompok alat elektronik perintah input alat mengolah input peralatan output informasi otomatis |
+
 ## 3.4 Instrumen Penelitian
 
 Instrumen yang digunakan dalam penelitian ini adalah laptop dengan processor AMD Athlon 300U with Radeon Vega Mobile Gfx 2.40 GHz dan RAM sebanyak 8 GB serta sistem operasi windows 10 Home 64 bit.
