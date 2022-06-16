@@ -136,7 +136,7 @@ Setelah dilakukan penghapusan Stopword dan karaktek yang tidak berguna, kemudian
 
 Setelah itu, data diatas akan diubah menjadi vektor satu dimensi sehingga menjadi :
 
-![Dice Similarity 3.3](https://latex.codecogs.com/svg.latex?\small&space;x&space;=&space;{&space;2,&space;1,&space;1,&space;2,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0&space;})
+![Dice Similarity 3.3](https://latex.codecogs.com/svg.latex?\small&space;x&space;=&space;{&space;2,&space;1,&space;1,&space;2,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0&space;})  
 ![Dice Similarity 3.3](https://latex.codecogs.com/svg.latex?\small&space;y&space;=&space;{1,&space;1,&space;1,&space;2,&space;0,&space;0,&space;1,&space;0,&space;2,&space;0,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1})
 
 Kemudian kedua vektor diatas dimasukkan kedalam rumus Dice Similarity Sehingga Menjadi :
