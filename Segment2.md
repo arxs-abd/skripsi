@@ -127,12 +127,11 @@ Plagiarisme berasal dari bahasa Latin “plagiare” yang berarti mencuri. Plagi
 
 ### 2.2.7 Dice Similarity
 
-Dice Similarity atau Sørensen–Dice coefficient merupakan salah satu algoritma yang mengukur kesamaan antara dua set data. Algoritma ini banyak digunakan dalam validasi algoritma segmentasi gambar yang dibuat dengan AI, tetapi ini adalah konsep yang jauh lebih umum yang dapat diterapkan pada kumpulan data untuk berbagai aplikasi termasuk NLP. Pada awalnya, penggunaan rumus dari Dice Similarity menggunakan dua set data diskrit X dan Y yaitu :
-
+Dice Similarity atau Sørensen–Dice coefficient merupakan salah satu algoritma yang mengukur kesamaan antara dua set data. Algoritma ini banyak digunakan dalam validasi algoritma segmentasi gambar yang dibuat dengan AI, tetapi ini adalah konsep yang jauh lebih umum yang dapat diterapkan pada kumpulan data untuk berbagai aplikasi termasuk NLP. Pada awalnya, penggunaan rumus dari Dice Similarity menggunakan dua set data diskrit X dan Y yaitu :  
 ![Dice Similarity 2.1](https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;|&space;X&space;\cap&space;Y|}{|X|&space;+&space;|Y|})
 
-Kemudian jika menggunakan data boolean, maka menggunakan definisi True Positive (TP), False Positive (FP), and False Negative (FN) dengan rumus yaitu :
+Kemudian jika menggunakan data boolean, maka menggunakan definisi True Positive (TP), False Positive (FP), and False Negative (FN) dengan rumus yaitu :  
 ![Dice Similarity 2.2](https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;TP}{2&space;TP&space;+&space;FP&space;+&space;FN})
 
-Jika menggunakan data vector, dengan A dan B sebagai vector, maka rumusnya yaitu :
+Jika menggunakan data vector, dengan A dan B sebagai vector, maka rumusnya yaitu :  
 ![Dice Similarity 2.3](<https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;.&space;(X&space;.&space;Y)}{|X|^2&space;+&space;|Y|^2}>)
