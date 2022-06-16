@@ -95,13 +95,45 @@ Dalam sistem ini, metode perhitungan yang digunakan adalam metode Dice Similarit
 4. Perhitungan Kemiripan Menggunakan Metode Dice Similarity.
    Setelah memperoleh kamus data, maka akan dilakukan perhitungan untuk memberikan persentase kemiripan antara input teks dan data teks yang berasal dari database. Ditahap ini dilakukan perulangan sebanyak data dalam database. Kemudian dilakukan perhitungan sesuai dengan rumus dari Dice Similarity kemudian hasilnya akan ditampilkan.
 
-   Untuk pengimplementasian dari Metode Cosine Similarity, diambil contoh dari definisi dari komputer menurut para ahli yaitu Menurut Robert H. Blissmer komputer adalah suatu alat elektronik yang mampu melakukan beberapa tugas seperti menerima input, memproses input tadi sesuai dengan programnya, menyimpan perintah-perintah dan hasil pengolahan, serta menyediakan output dalam bentuk informasi. Sedangkan menurut Arief Susanto, komputer adalah sekelompok alat elektronik yang terdiri atas perintah input, alat yang mengolah input, dan peralatan output yang memberikan informasi serta bekerja secara otomatis. (Susanto, 2009).
+Untuk pengimplementasian dari Metode Cosine Similarity, diambil contoh dari definisi dari komputer menurut para ahli yaitu Menurut Robert H. Blissmer komputer adalah suatu alat elektronik yang mampu melakukan beberapa tugas seperti menerima input, memproses input tadi sesuai dengan programnya, menyimpan perintah-perintah dan hasil pengolahan, serta menyediakan output dalam bentuk informasi. Sedangkan menurut Arief Susanto, komputer adalah sekelompok alat elektronik yang terdiri atas perintah input, alat yang mengolah input, dan peralatan output yang memberikan informasi serta bekerja secara otomatis. (Susanto, 2009).
 
-   Setelah mendapatkan kedua data diatas, kemudian dilakukan pembagian. Untuk pengertian dari Robert H. Blissmer akan menjadi data dari database sebagai X, kemudian untuk pengertian dari Arief Susanto akan menjadi data yang akan dibandingkan dengan data dari database sebagai Y. Sebelum diolah, kedua data diatas akan dilakukan penghapusan Stopword dan karaktek yang tidak berguna dalam perhitungan nantinya sehingga menjadi :
+Setelah mendapatkan kedua data diatas, kemudian dilakukan pembagian. Untuk pengertian dari Robert H. Blissmer akan menjadi data dari database sebagai X, kemudian untuk pengertian dari Arief Susanto akan menjadi data yang akan dibandingkan dengan data dari database sebagai Y. Sebelum diolah, kedua data diatas akan dilakukan penghapusan Stopword dan karaktek yang tidak berguna dalam perhitungan nantinya sehingga menjadi :
 
-   | Data X                                                                                                                                                  | Data Y                                                                                            |
-   | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-   | alat elektronik tugas menerima input memproses input sesuai programnya menyimpan perintah-perintah hasil pengolahan menyediakan output bentuk informasi | sekelompok alat elektronik perintah input alat mengolah input peralatan output informasi otomatis |
+| Data X                                                                                                                                                  | Data Y                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| alat elektronik tugas menerima input memproses input sesuai programnya menyimpan perintah-perintah hasil pengolahan menyediakan output bentuk informasi | sekelompok alat elektronik perintah input alat mengolah input peralatan output informasi otomatis |
+
+Setelah dilakukan penghapusan Stopword dan karaktek yang tidak berguna, kemudian dilakukan pembuatan kamus kata lalu dilakukan perhutngan jumlah kata terhadap kamus data yang ada sehingga menjadi.
+
+| Kamus Kata  | Data X | Data Y |
+| ----------- | :----: | :----: |
+| alat        |   2    |   1    |
+| elektronik  |   1    |   1    |
+| informasi   |   1    |   1    |
+| input       |   2    |   2    |
+| mengolah    |   1    |   0    |
+| otomatis    |   1    |   0    |
+| output      |   1    |   1    |
+| peralatan   |   1    |   0    |
+| perintah    |   1    |   2    |
+| sekelompok  |   1    |   0    |
+| bentuk      |   0    |   1    |
+| hasil       |   0    |   1    |
+| memproses   |   0    |   1    |
+| menerima    |   0    |   1    |
+| menyediakan |   0    |   1    |
+| menyimpan   |   0    |   1    |
+| pengolahan  |   0    |   1    |
+| programnya  |   0    |   1    |
+| sesuai      |   0    |   1    |
+| tugas       |   0    |   1    |
+
+Setelah itu, data diatas akan diubah menjadi vektor satu dimensi sehingga menjadi :
+
+x = {2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+y = {1, 1, 1, 2, 0, 0, 1, 0, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+
+Kemudian kedua vektor diatas dimasukkan kedalam rumus Dice Similarity Sehingga Menjadi
 
 ## 3.4 Instrumen Penelitian
 
