@@ -79,7 +79,11 @@ Keterangan :
 
 ## 3.3 Metode Penelitian
 
-Dalam sistem ini, metode perhitungan yang digunakan adalam metode Dice Similarity dengan membandingkan data teks yang diinput pengguna dengan teks yang terdapat didalam database atau repositori teks. Algoritma perhitungan persentase kemiripan antar teks sebagai berikut :
+Dalam sistem ini, metode perhitungan yang digunakan adalam metode Dice Similarity dengan membandingkan data teks yang diinput pengguna dengan teks yang terdapat didalam database atau repositori teks.
+
+### 3.3.1 Algoritma Dice Similarity
+
+Algoritma perhitungan persentase kemiripan antar teks sebagai berikut :
 
 ![Flowchart Dice Similarity](img/algo_dice_similarity.png)
 
@@ -94,6 +98,8 @@ Dalam sistem ini, metode perhitungan yang digunakan adalam metode Dice Similarit
 
 4. Perhitungan Kemiripan Menggunakan Metode Dice Similarity.
    Setelah memperoleh kamus data, maka akan dilakukan perhitungan untuk memberikan persentase kemiripan antara input teks dan data teks yang berasal dari database. Ditahap ini dilakukan perulangan sebanyak data dalam database. Kemudian dilakukan perhitungan sesuai dengan rumus dari Dice Similarity kemudian hasilnya akan ditampilkan.
+
+### 3.3.2 Implementasi Dice Similarity
 
 Untuk pengimplementasian dari Metode Cosine Similarity, diambil contoh dari definisi dari komputer menurut para ahli yaitu Menurut Robert H. Blissmer komputer adalah suatu alat elektronik yang mampu melakukan beberapa tugas seperti menerima input, memproses input tadi sesuai dengan programnya, menyimpan perintah-perintah dan hasil pengolahan, serta menyediakan output dalam bentuk informasi. Sedangkan menurut Arief Susanto, komputer adalah sekelompok alat elektronik yang terdiri atas perintah input, alat yang mengolah input, dan peralatan output yang memberikan informasi serta bekerja secara otomatis. (Susanto, 2009).
 
@@ -133,7 +139,7 @@ Setelah itu, data diatas akan diubah menjadi vektor satu dimensi sehingga menjad
 x = {2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 y = {1, 1, 1, 2, 0, 0, 1, 0, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 
-Kemudian kedua vektor diatas dimasukkan kedalam rumus Dice Similarity Sehingga Menjadi
+Kemudian kedua vektor diatas dimasukkan kedalam rumus Dice Similarity Sehingga Menjadi :
 
 ## 3.4 Instrumen Penelitian
 
