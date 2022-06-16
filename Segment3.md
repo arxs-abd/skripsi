@@ -145,7 +145,7 @@ Kemudian kedua vektor diatas dimasukkan kedalam rumus Dice Similarity Sehingga M
 
 Untuk mempermudah perhitungan, dilakukan beberapa penambahan row dan field sehingga menjadi :
 
-| Kamus Data  | Data X | Data Y |  X.Y   |  X^2   |  Y^2   |
+| Kamus Data  | Data X | Data Y |  X.Y   |  X<sup>2</sup>   |  Y<sup>2</sup>   |
 | ----------- | :----: | :----: | :----: | :----: | :----: |
 | alat        |   2    |   1    |   2    |   4    |   1    |
 | bentuk      |   0    |   1    |   0    |   0    |   1    |
