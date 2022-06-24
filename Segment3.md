@@ -145,28 +145,28 @@ Kemudian kedua vektor diatas dimasukkan kedalam rumus Dice Similarity Sehingga M
 
 Untuk mempermudah perhitungan, dilakukan beberapa penambahan row dan field sehingga menjadi :
 
-| Kamus Data  | Data X | Data Y |  X.Y   |  X<sup>2</sup>   |  Y<sup>2</sup>   |
-| ----------- | :----: | :----: | :----: | :----: | :----: |
-| alat        |   2    |   1    |   2    |   4    |   1    |
-| bentuk      |   0    |   1    |   0    |   0    |   1    |
-| elektronik  |   1    |   1    |   1    |   1    |   1    |
-| hasil       |   0    |   1    |   0    |   0    |   1    |
-| infromasi   |   1    |   1    |   1    |   1    |   1    |
-| input       |   2    |   2    |   4    |   4    |   4    |
-| memproses   |   0    |   1    |   0    |   0    |   1    |
-| menerima    |   0    |   1    |   0    |   0    |   1    |
-| mengolah    |   1    |   0    |   0    |   1    |   0    |
-| menyediakan |   0    |   1    |   0    |   0    |   1    |
-| menyimpan   |   0    |   1    |   0    |   0    |   1    |
-| otomatis    |   1    |   0    |   0    |   1    |   0    |
-| output      |   1    |   1    |   1    |   1    |   1    |
-| perintah    |   1    |   2    |   2    |   1    |   4    |
-| perlatan    |   1    |   0    |   0    |   1    |   0    |
-| programnya  |   0    |   1    |   0    |   0    |   1    |
-| sekelompok  |   1    |   0    |   0    |   1    |   0    |
-| sesuai      |   0    |   1    |   0    |   0    |   1    |
-| tugas       |   0    |   1    |   0    |   0    |   1    |
-| **Total**   | **12** | **18** | **11** | **16** | **22** |
+| Kamus Data  | Data X | Data Y |  X.Y   | X<sup>2</sup> | Y<sup>2</sup> |
+| ----------- | :----: | :----: | :----: | :-----------: | :-----------: |
+| alat        |   2    |   1    |   2    |       4       |       1       |
+| bentuk      |   0    |   1    |   0    |       0       |       1       |
+| elektronik  |   1    |   1    |   1    |       1       |       1       |
+| hasil       |   0    |   1    |   0    |       0       |       1       |
+| infromasi   |   1    |   1    |   1    |       1       |       1       |
+| input       |   2    |   2    |   4    |       4       |       4       |
+| memproses   |   0    |   1    |   0    |       0       |       1       |
+| menerima    |   0    |   1    |   0    |       0       |       1       |
+| mengolah    |   1    |   0    |   0    |       1       |       0       |
+| menyediakan |   0    |   1    |   0    |       0       |       1       |
+| menyimpan   |   0    |   1    |   0    |       0       |       1       |
+| otomatis    |   1    |   0    |   0    |       1       |       0       |
+| output      |   1    |   1    |   1    |       1       |       1       |
+| perintah    |   1    |   2    |   2    |       1       |       4       |
+| perlatan    |   1    |   0    |   0    |       1       |       0       |
+| programnya  |   0    |   1    |   0    |       0       |       1       |
+| sekelompok  |   1    |   0    |   0    |       1       |       0       |
+| sesuai      |   0    |   1    |   0    |       0       |       1       |
+| tugas       |   0    |   1    |   0    |       0       |       1       |
+| **Total**   | **12** | **18** | **11** |    **16**     |    **22**     |
 
 Setelah memperoleh table diatas, kemudian nilai tersebut dimasukkan kedalam rumus Dice Similarity sehingga menjadi :
 
@@ -179,4 +179,4 @@ Sehingga diperoleh nilai Dice Similarity adalah 0,5789473684 atau jika dipersent
 
 ## 3.4 Instrumen Penelitian
 
-Instrumen yang digunakan dalam penelitian ini adalah laptop dengan processor AMD Athlon 300U with Radeon Vega Mobile Gfx 2.40 GHz dan RAM sebanyak 8 GB serta sistem operasi windows 10 Home 64 bit.
+Instrumen yang digunakan dalam penelitian ini adalah terbagi dua yaitu Hardware dan Software. Untuk hardware menggunakan laptop dengan processor AMD Athlon 300U with Radeon Vega Mobile Gfx 2.40 GHz dan RAM sebanyak 8 GB serta sistem operasi windows 10 Home 64 bit. Sedangkan software yang digunakan yaitu Visual Studio Code dan Microsoft Edge
