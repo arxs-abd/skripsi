@@ -135,3 +135,81 @@ Kemudian jika menggunakan data boolean, maka menggunakan definisi True Positive 
 
 Jika menggunakan data vector, dengan A dan B sebagai vector, maka rumusnya yaitu :  
 ![Dice Similarity 2.3](<https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;.&space;(X&space;.&space;Y)}{|X|^2&space;+&space;|Y|^2}>)
+
+#### 2.2.7.1 Implementasi Dice Similarity
+
+Untuk pengimplementasian dari Metode Cosine Similarity, diambil contoh dari definisi dari komputer menurut para ahli yaitu Menurut Robert H. Blissmer _komputer adalah suatu alat elektronik yang mampu melakukan beberapa tugas seperti menerima input, memproses input tadi sesuai dengan programnya, menyimpan perintah-perintah dan hasil pengolahan, serta menyediakan output dalam bentuk informasi_. Sedangkan menurut Arief Susanto, _komputer adalah sekelompok alat elektronik yang terdiri atas perintah input, alat yang mengolah input, dan peralatan output yang memberikan informasi serta bekerja secara otomatis_. (Susanto, 2009).
+
+Setelah mendapatkan kedua data diatas, kemudian dilakukan pembagian. Untuk pengertian dari Robert H. Blissmer akan menjadi data dari database sebagai X, kemudian untuk pengertian dari Arief Susanto akan menjadi data yang akan dibandingkan dengan data dari database sebagai Y. Sebelum diolah, kedua data diatas akan dilakukan penghapusan Stopword dan karaktek yang tidak berguna dalam perhitungan nantinya sehingga menjadi :
+
+| Data X                                                                                                                                                  | Data Y                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| alat elektronik tugas menerima input memproses input sesuai programnya menyimpan perintah-perintah hasil pengolahan menyediakan output bentuk informasi | sekelompok alat elektronik perintah input alat mengolah input peralatan output informasi otomatis |
+
+Setelah dilakukan penghapusan Stopword dan karaktek yang tidak berguna, kemudian dilakukan pembuatan kamus kata lalu dilakukan perhutngan jumlah kata terhadap kamus data yang ada sehingga menjadi.
+
+| Kamus Kata  | Data X | Data Y |
+| ----------- | :----: | :----: |
+| alat        |   2    |   1    |
+| elektronik  |   1    |   1    |
+| informasi   |   1    |   1    |
+| input       |   2    |   2    |
+| mengolah    |   1    |   0    |
+| otomatis    |   1    |   0    |
+| output      |   1    |   1    |
+| peralatan   |   1    |   0    |
+| perintah    |   1    |   2    |
+| sekelompok  |   1    |   0    |
+| bentuk      |   0    |   1    |
+| hasil       |   0    |   1    |
+| memproses   |   0    |   1    |
+| menerima    |   0    |   1    |
+| menyediakan |   0    |   1    |
+| menyimpan   |   0    |   1    |
+| pengolahan  |   0    |   1    |
+| programnya  |   0    |   1    |
+| sesuai      |   0    |   1    |
+| tugas       |   0    |   1    |
+
+Setelah itu, data diatas akan diubah menjadi vektor satu dimensi sehingga menjadi :
+
+![Dice Similarity 3.3](https://latex.codecogs.com/svg.latex?\small&space;x&space;=&space;{&space;2,&space;1,&space;1,&space;2,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0,&space;0&space;})  
+![Dice Similarity 3.3](https://latex.codecogs.com/svg.latex?\small&space;y&space;=&space;{1,&space;1,&space;1,&space;2,&space;0,&space;0,&space;1,&space;0,&space;2,&space;0,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1,&space;1})
+
+Kemudian kedua vektor diatas dimasukkan kedalam rumus Dice Similarity Sehingga Menjadi :
+
+![Dice Similarity 3.3](<https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;.&space;(X&space;.&space;Y)}{|X|^2&space;+&space;|Y|^2}>)
+
+Untuk mempermudah perhitungan, dilakukan beberapa penambahan row dan field sehingga menjadi :
+
+| Kamus Data  | Data X | Data Y |  X.Y   | X<sup>2</sup> | Y<sup>2</sup> |
+| ----------- | :----: | :----: | :----: | :-----------: | :-----------: |
+| alat        |   2    |   1    |   2    |       4       |       1       |
+| bentuk      |   0    |   1    |   0    |       0       |       1       |
+| elektronik  |   1    |   1    |   1    |       1       |       1       |
+| hasil       |   0    |   1    |   0    |       0       |       1       |
+| infromasi   |   1    |   1    |   1    |       1       |       1       |
+| input       |   2    |   2    |   4    |       4       |       4       |
+| memproses   |   0    |   1    |   0    |       0       |       1       |
+| menerima    |   0    |   1    |   0    |       0       |       1       |
+| mengolah    |   1    |   0    |   0    |       1       |       0       |
+| menyediakan |   0    |   1    |   0    |       0       |       1       |
+| menyimpan   |   0    |   1    |   0    |       0       |       1       |
+| otomatis    |   1    |   0    |   0    |       1       |       0       |
+| output      |   1    |   1    |   1    |       1       |       1       |
+| perintah    |   1    |   2    |   2    |       1       |       4       |
+| perlatan    |   1    |   0    |   0    |       1       |       0       |
+| programnya  |   0    |   1    |   0    |       0       |       1       |
+| sekelompok  |   1    |   0    |   0    |       1       |       0       |
+| sesuai      |   0    |   1    |   0    |       0       |       1       |
+| tugas       |   0    |   1    |   0    |       0       |       1       |
+| **Total**   | **12** | **18** | **11** |    **16**     |    **22**     |
+
+Setelah memperoleh table diatas, kemudian nilai tersebut dimasukkan kedalam rumus Dice Similarity sehingga menjadi :
+
+![Dice Similarity 3.4](<https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;.&space;(X&space;.&space;Y)}{|X|^2&space;+&space;|Y|^2}>)  
+![Dice Similarity 3.5](https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{2&space;.&space;11}{16&space;+&space;22})  
+![Dice Similarity 3.6](https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;\frac{22}{38})  
+![Dice Similarity 3.6](https://latex.codecogs.com/svg.latex?\small&space;DSC&space;=&space;0,5789473684)
+
+Sehingga diperoleh nilai Dice Similarity adalah 0,5789473684 atau jika dipersentasekan menjadi 57, 8 %. Jadi, Persentase kesamaan antara antara Data X dengan Data Y adalah sebesar 57, 8 %.
