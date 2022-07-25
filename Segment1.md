@@ -21,21 +21,21 @@
 
 Adapun beberapa point yang menjadi rumusan masalah penelitian ini yaitu :
 
-1. Bagaimana merancang sebuah sistem informasi berbasis web menggunakan metode Dice Similarity ?
+1. Bagaimana merancang sebuah aplikasi berbasis web ?
 2. Bagaimana mengimplementasikan metode Dice Similarity ?
-3. Bagaimana mengukur kesamaan dari sebuah dokumen dengan dokumen lainnya menggunakan metode Dice Similarity ?
+3. Bagaimana menguji kesamaan dari sebuah dokumen dengan dokumen lainnya menggunakan metode Dice Similarity ?
 
 ## 1.3 Tujuan Penelitian
 
 Adapun beberapa point yang menjadi tujuan penelitian ini yaitu :
 
-1. Merancang sebuah sistem informasi berbasis web menggunakan metode Dice Similarity.
+1. Merancang sebuah aplikasi berbasis web.
 2. Mengimplementasikan metode Dice Similarity.
 3. Mengukur kesamaan dari sebuah dokumen dengan dokumen lainnya menggunakan metode Dice Similarity.
 
 ## 1.4 Manfaat Penelitian
 
-Penelitian ini merupakan mengimplimentasian metode Dice Similarity pada sebuah sistem informasi berbasis web guna mengetahui persentase kesamaan sebuah dokumen dengan dokumen lainnya sehungga dapat digunakan untuk mengurangi tindak plagiarisme dengan mudah.
+Penelitian ini merupakan pengimentasian metode Dice Similarity pada sebuah aplikasi berbasis web guna mengetahui persentase kesamaan sebuah dokumen dengan dokumen lainnya sehungga dapat digunakan untuk mengurangi tindak plagiarisme dengan mudah.
 
 ## 1.5 Batasan Masalah
 
@@ -43,4 +43,3 @@ Adapaun beberapa batasan masalah pada penelitian ini yaitu :
 
 1. Sistem ini dibuat menggunakan bahasa pemrograman Javascript dengan runtime environment Nodejs, framework Express JS, dengan database MongoDB.
 2. Menggunakan data berupa jurnal yang diinput oleh user dan memiliki ekstensi pdf (Portable Document Format).
-3. Menggunakan metode Dice Similarity Similarity.
