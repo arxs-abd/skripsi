@@ -1,0 +1,2916 @@
+-config/fileConfig.js
+const multer = require('multer')
+const fileStorage = multer.diskStorage({
+    destination : (req, file, cb) => {
+        cb(null, 'public/docs')
+    },
+    filename : (req, file, cb) => {
+        cb(null, new Date().getTime() +  '-' + file.originalname)
+    }
+})
+const fileStorageRes = multer.diskStorage({
+    destination : (req, file, cb) => {
+        cb(null, 'public/result')
+    },
+    filename : (req, file, cb) => {
+        cb(null, new Date().getTime() +  '-' + file.originalname)
+    }
+})
+
+const fileFilter = (req, file, cb) => {
+    // console.log(file.mimetype)
+    if (file.mimetype == 'application/pdf') cb(null, true)
+    else cb(null, false)
+}
+
+module.exports = {
+    fileStorage,
+    fileStorageRes,
+    fileFilter
+}
+
+-controllers/adminController.js
+require('../utils/db')
+const jwt = require('jsonwebtoken')
+const {User, createPassword} = require('../models/user')
+const {File} = require('../models/files')
+
+const admin = async (req, res) => {
+    const allUser = await User.find()
+    const allFile = await File.find()
+    // res.send(allUser)
+    res.render('../views/admin-page', {
+        layout : 'main',
+        user : req.session.userName,
+        allUser : allUser,
+        allFile : allFile,
+        errorsUser : req.flash('errors-add-user'),
+        successUser : req.flash('success-add-user'),
+        errorsFile : req.flash('errors-add-file'),
+        successFile : req.flash('success-add-file'),
+    })
+}
+
+const addUser = async (req, res) => {
+    const nim = req.body.nim
+    const userName = req.body.name
+    const password = req.body.password
+    const newUser = await new User({
+        uid : nim,
+        name : userName,
+        password : createPassword(password)
+    })
+    newUser.save()
+    req.flash('success-add-user', 'New User Has Been Added')
+    return res.redirect('/admin')
+}
+
+const updateUser = async (req, res) => {
+    const name = req.body.name
+    const uid = req.body.nim
+    // const user = await User.findOne({uid : uid})
+
+    await User.updateOne({
+        uid : uid
+    },
+    {
+        $set : {
+            uid : uid,
+            name : name,
+        }
+    })
+
+    req.flash('success-add-user', 'User Has Been Updated')
+    return res.redirect('/admin')
+}
+
+const updateUserByUser = async (req, res) => {
+    const name = req.body.name
+    const uid = req.body.nim
+    const password = req.body.password
+    // return res.send(req.body)
+    // const user = await User.findOne({uid : uid})
+    const update = {
+        uid : uid,
+        name : name,
+    }
+    if (password.length != 0) update.password = createPassword(password)
+    // console.log(update)
+
+    // return res.send(update)
+
+    await User.updateOne({
+        _id : req.body._id
+    },
+    {
+        $set : update
+    })
+
+    const newUserUpdate = await User.findOne({_id : req.body._id})
+    req.session.details = newUserUpdate
+
+    req.flash('success-update-user', 'User Has Been Updated')
+    return res.redirect('/')
+}
+
+const deleteUser = async (req, res) => {
+    // return res.send(req.body)
+    const id = req.body.id
+    const name = req.body.name
+    await User.deleteOne({_id : id})
+    req.flash('success-add-user', `User ${name} Has Been Deleted`)
+    return res.redirect('/admin')
+}
+
+const paginationUser = async (req, res) => {
+    const {limit : lim, pages} = req.query
+    const {limit, offset} = getPagination(pages, lim)
+
+    const data = await User.paginate({}, {offset, limit})
+    const result = {
+        totalItems : data.totalDocs,
+        data : data.docs,
+        totalPages : data.totalPages,
+        currentPage : data.page - 1,
+    }
+    return res.send(result)
+}
+
+const allUser = async (req, res) => {
+    const allUser = await User.find({}, {_id : 1, name : 1})
+
+    return res.send(allUser)
+}
+
+const paginationFile = async (req, res) => {
+    let data
+    const {limit : lim, pages} = req.query
+    const {limit, offset} = getPagination(pages, lim)
+
+    const token = req.cookies['x-access-token']
+    const dataUser = jwt.verify(token, process.env.SECRET_KEY)
+    // console.log(dataUser.data)
+    if (dataUser.data.uid === '030400') data = await File.paginate({}, {offset, limit})
+    else data = await File.paginate({uploader : dataUser.data._id}, {offset, limit})
+
+    const result = {
+        totalItems : data.totalDocs,
+        data : data.docs,
+        totalPages : data.totalPages,
+        currentPage : data.page - 1,
+    }
+    return res.send(result)
+}
+
+const getPagination = (page, size) => {
+    const limit = size ? +size : 3
+    const offset = page ? page * limit : 0
+    return { limit, offset }
+}
+
+
+module.exports = {
+    admin,
+    addUser,
+    updateUser,
+    deleteUser,
+    updateUserByUser,
+    paginationUser,
+    paginationFile,
+    allUser
+}
+
+-controllers/fileController.js
+require('dotenv').config()
+const pdfParse = require('pdf-parse')
+const {File, sanitizePdf} = require('../models/files')
+const {promisify} = require('util')
+const fs = require('fs')
+const { User } = require('../models/user')
+const jwt = require('jsonwebtoken')
+
+const allChar = ["-", " ", ""]
+
+
+const unlink = promisify(fs.unlink)
+
+const uploadPdf = async (req, res) => {
+    const location = `${req.file.destination}/${req.file.filename}`
+    const text = (await pdfParse(location)).text
+    const result = sanitizePdf(text)
+    const token = req.cookies['x-access-token']
+    const data = jwt.verify(token, process.env.SECRET_KEY)
+
+    const newFile = new File({
+        name : req.body.title,
+        fileName : req.file.filename,
+        uploader : data.data._id,
+        text : result,
+    })
+
+    await newFile.save()
+    req.flash('success-add-file', 'File Has Been Added')
+    if (req.session.userName != 'Admin') return res.redirect('/')
+    return res.redirect('/admin')
+}
+
+const deletePdf = async (req, res) => {
+    // res.send(req.body)
+    const id = req.body.id
+    const oldFile = await File.findOne({_id : id})
+    // return res.send(oldFile.fileName)
+    fs.unlink(`public/docs/${oldFile.fileName}`, async(err) => {
+        await File.deleteOne({_id : id})
+        req.flash('success-add-file', 'File Has Been Deleted')
+        return res.redirect('/admin')
+    })
+}
+
+const resultNone = async (req, res) => {
+    const allUser = await User.find({}, {_id : 1, name : 1})
+    const allFile = await File.find({}, {name : 1, text : 1, uploader : 1, fileName : 1})
+
+    const location = req.files['upload-res']
+    const text = (await pdfParse(location)).text
+    const resultText = sanitizePdf(text)
+    // console.log(resultText)
+    const dataFile = {
+        name : req.files['upload-res'].name,
+        char : text.length,
+        word : text.split(' ').length,
+        size : req.files['upload-res'].size,
+    }
+
+    const result = {
+        fileUpload : dataFile,
+        data : resultText,
+        user : allUser,
+        file : allFile,
+    }
+    res.send(result)
+}
+
+const result = async (req, res) => {
+    const allUser = await User.find({}, {_id : 1, name : 1})
+    const allFile = await File.find({}, {name : 1, text : 1, uploader : 1, fileName : 1})
+    let result
+    if (req.body.text !== '') {
+        result = sanitizePdf(req.body.text)
+    } else {
+        const location = req.file.path
+        const text = (await pdfParse(location)).text
+        result = sanitizePdf(text)
+    }
+    
+    let allData = {}
+    
+    const retirve = {
+        fileInformation : req.file,
+        resultAll : [],
+    }
+
+    retirve.fileInformation.length = separator(result.length)
+    retirve.fileInformation.word = separator(result.split(' ').length)
+    
+    addDict(result, allData)
+    allFile.forEach(files => {
+        addDict(files.text, allData)
+    })
+
+    for (const prop in allData) {
+        if (result.split(' ').includes(prop)) {
+            let index = 0
+            result.split(' ').forEach(x => {
+                if (prop === x) index += 1
+            })
+            allData[prop]["s"] = index
+        } else {
+            allData[prop]["s"] = 0
+        }
+
+        allFile.forEach((e, i) => {
+            if (e.text.split(' ').includes(prop)) {
+                let index = 0
+                e.text.split(' ').forEach(x => {
+                    if (prop === x) index += 1
+                })
+                allData[prop]["s" + (i + 1)] = index
+            } else {
+                allData[prop]["s" + (i + 1)] = 0
+            }
+        })
+
+    }
+    
+    const objectData = Object.keys(allData)[0]
+    const varObject = Object.keys(allData[objectData])
+    varObject.shift()
+
+
+    varObject.forEach((e, i) => {
+        allFile[i].text = ''
+        let aTimesB = 0
+        let aa = 0
+        let bb = 0
+    
+        Object.keys(allData).forEach(f => {
+            aTimesB += allData[f]['s'] * allData[f][e]
+            aa += allData[f]['s'] * allData[f]['s']
+            bb += allData[f][e] * allData[f][e]
+        })
+    
+        const resultSimilarity = (2 * aTimesB) / (aa + bb)
+        // console.log(`Similarity Data ${i + 1} Is ${Math.round(resultSimilarity * 100)} %`)
+        const resForRetervie = {
+            file : allFile[i],
+            result : Math.round(resultSimilarity * 100)
+        }
+        retirve.resultAll.push(resForRetervie)
+    
+    
+    })
+
+    retirve.resultAll.sort((a, b) => (a.result < b.result) ? 1 : -1)
+
+    
+    let resultPlag = 0
+    retirve.resultAll.forEach(e => {
+        resultPlag += e.result
+    })
+    retirve.plag = Math.round(resultPlag / retirve.resultAll.length)
+    retirve.resultAll = retirve.resultAll.filter(file => {
+        return file.result > 50
+    })
+    
+    await unlink(location)
+    
+
+    res.render('../views/result-page', {
+        layout : 'main',
+        user : allUser,
+        result : retirve
+    })
+}
+
+function addDict(datax, to) {
+    datax.toLowerCase().split(' ').forEach(e => {
+        e.trim()
+        if (!to.hasOwnProperty(e)) to[e] = {}
+    })
+}
+
+function separator(numb) {
+    var str = numb.toString().split('.');
+    str[0] = str[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return str.join('.');
+}
+
+module.exports = {
+    uploadPdf,
+    deletePdf,
+    result,
+    resultNone,
+}
+
+-controllers/homeController.js
+const { File } = require('../models/files')
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
+
+require('../utils/db')
+
+const home = async (req, res) => {
+    let user, fileUser
+    const token = req.cookies['x-access-token']
+    if (token) user = jwt.verify(token, process.env.SECRET_KEY)
+    if (user?.data?._id) fileUser = await File.find({uploader : user?.data?._id})
+    res.render('../views/home-page', {
+        layout : 'main',
+        user : user?.data?.name,
+        details : user?.data,
+        errorsUpdate : req.flash('errors-update-user'),
+        successUpdate : req.flash('success-update-user'),
+        errorsFile : req.flash('errors-add-file'),
+        successFile : req.flash('success-add-file'),
+        file : fileUser
+    })
+}
+
+module.exports = {
+    home
+}
+
+-controllers/loginController.js
+require('dotenv').config()
+const {User, verifyPassword, createPassword} = require('../models/user')
+const jwt = require('jsonwebtoken')
+require('../utils/db')
+
+const loginView = (req, res) => {
+    return res.render('../views/login-page', {
+        layout : 'main',
+        errors : req.flash('errors'),
+    })
+}
+
+const loginAuth = async(req, res) => {
+    const nim = req.body.nim
+    const password = req.body.password
+
+    if (nim === '030400' && password == '1234') {
+        let admin = await User.findOne({uid : '030400'})
+        if (!admin) {
+            const newAdmin = new User({
+                uid : '030400',
+                name : 'admin',
+                password : createPassword('1234')
+            })
+            await newAdmin.save()
+            admin = await User.findOne({uid : '030400'})
+        }
+        req.session.userName = 'Admin'
+        req.session._id = admin._id
+        const token = jwt.sign({data : admin}, process.env.SECRET_KEY)
+        res.cookie('x-access-token', token)
+        return res.redirect('/admin')
+    }
+    const userLog = await User.findOne({
+        uid : nim
+    })
+
+    if (!userLog) {
+        req.flash('errors', 'errors')
+         return res.redirect('/login')
+    }
+    
+    let passwordVerify = await verifyPassword(password, userLog.password)
+    
+    if (passwordVerify) {
+        const token = jwt.sign({data : userLog}, process.env.SECRET_KEY)
+        res.cookie('x-access-token', token)
+        return res.redirect('/')
+    }
+    req.flash('errors', 'errors')
+    return res.redirect('/login')
+}
+
+const logout = (req, res) => {
+    req.session.destroy(error => {
+        res.clearCookie('x-access-token')
+        res.redirect('/login')
+    })
+}
+
+module.exports = {
+    loginView,
+    loginAuth,
+    logout,
+}
+
+-middleware/admin.js
+require('dotenv').config()
+const jwt = require('jsonwebtoken')
+
+const adminVerify = (req, res, next) => {
+    const token = req.cookies['x-access-token']
+    if (!token) return res.redirect('/')
+    const data = jwt.verify(token, process.env.SECRET_KEY)
+    if (data.data.uid === '030400') return next()
+    return res.redirect('/')
+}
+
+
+module.exports = {
+    adminVerify
+}
+
+-middleware/file.js
+const {check, validationResult} = require('express-validator')
+const fs = require('fs')
+
+const toAddFile = [
+    check('title').isLength({min : 4}),
+    (req, res, next) => {
+        const errors = validationResult(req)
+        if (errors.isEmpty()) return next()
+        req.flash('errors-add-file', 'Failed to Add New File')
+        if (typeof req.file === 'undefined') {
+            return res.redirect('/admin')
+        }
+        fs.unlink(`public/docs/${req.file.filename}`, (error) => {
+            return res.redirect('/admin')
+        })
+    }
+]
+
+module.exports = {
+    toAddFile
+}
+
+-middleware/user.js
+require('dotenv').config()
+const jwt = require('jsonwebtoken')
+const {check, validationResult} = require('express-validator')
+const {User} = require('../models/user')
+
+const toLogin = [
+    [
+        check('nim').isLength({min : 10}),
+        check('password').isLength({min : 5}),
+        (req, res, next) => {
+            const errors = validationResult(req)
+            if (errors.isEmpty()) return next()
+            if (errors.array()[0].value === '030400' && errors.array()[0].param === 'nim') return next()
+            req.flash('errors', 'Your Nim or Password is Wrong')
+            return res.redirect('/login')
+        }
+    ],
+]
+
+const toAddUser = [
+    check('nim').isLength({min : 4}).custom(async (value) => {
+        const isNimExist = await User.findOne({uid : value})
+        if (isNimExist) throw new Error('NIM is Already exist')
+        return true
+    }),
+    check('name').isLength({min : 4}),
+    check('password').isLength({min : 5}),
+    (req, res, next) => {
+        const errors = validationResult(req)
+        if (errors.isEmpty()) return next()
+        req.flash('errors-add-user', 'Failed to Add New User')
+        return res.redirect('/admin')
+    }
+]
+
+const toUpdateUser = [
+    check('name').isLength({min : 4}),
+    // check('nim').isLength({min : 4}).custom(async value => {
+    //     const isNimExist = await User.findOne({uid : value})
+    //     if (isNimExist) throw new Error('NIM is Already exist')
+    //     return true
+    // }),
+    (req, res, next) => {
+        const errors = validationResult(req)
+        if (errors.isEmpty()) return next()
+        req.flash('errors-add-user', 'Failed to Update User')
+        return res.redirect('/admin')
+    }
+]
+
+const toUpdateUserByUser = [
+    check('nim').isLength({min : 4}).custom(async (value, {req}) => {
+        const id = req.body._id
+        const isNimExist = await User.findOne({uid : value})
+        if (isNimExist && isNimExist._id.toHexString().slice(0, 23) !== id.slice(0, 23)) throw new Error('NIM is Already exist')
+        return true
+    }),
+    check('name').isLength({min : 4}),
+    check('password').custom((val) => {
+        if (val.length !== 0 && val.length < 5) throw new Error('Minimum Password Length is 4')
+        return true
+    }),
+    (req, res, next) => {
+        const errors = validationResult(req)
+        if (errors.isEmpty()) return next()
+        req.flash('errors-update-user', 'Failed to Update User')
+        return res.redirect('/')
+    }
+]
+
+const verifyToken = (req, res, next) => {
+    const token = req.cookies['x-access-token']
+    // if (!token) res.redirect('/')
+    console.log(jwt.verify(token, process.env.SECRET_KEY))
+    next()
+}
+
+
+module.exports = {
+    toLogin,
+    toAddUser,
+    toUpdateUser,
+    toUpdateUserByUser,
+    verifyToken,
+}
+
+-models/admin.js
+require('../utils/db')
+
+const { User, createPassword } = require('../models/user')
+
+const admin = new User({
+    name : 'Admin',
+    uid : '030400',
+    password : createPassword('1234')
+})
+
+console.log(admin)
+
+admin.save()
+
+-models/files.js
+require('../utils/db')
+const mongoose = require('mongoose')
+const mongoosePaginate = require('mongoose-paginate-v2');
+const {stopWord} = require('../utils/stopWord')
+const {userSchema} = require('../models/user')
+const sastrawi = require('sastrawijs')
+const allChar = ["-", " ", ""]
+
+const stemmer = new sastrawi.Stemmer()
+const tokenizer = new sastrawi.Tokenizer()
+
+const fileSchema = new mongoose.Schema({
+    name : {
+        type : String,
+        required : true,
+    },
+    fileName : {
+        type : String,
+        required : true
+    },
+    uploader : {
+        type : String,
+        required : true
+    },
+    text : {
+        type : String,
+        required : true,
+    },
+})
+fileSchema.plugin(mongoosePaginate)
+const File = mongoose.model('File', fileSchema)
+
+const sanitizePdf2 = (text) => {
+    const textFix = text.toLowerCase().replace(/[^a-z0-9 ]/gi, ' ')
+    const newData = []
+    // remove Stopword
+    textFix.toLowerCase().split(' ').forEach(e => {
+        e.trim()
+        if (e.length > 2 && !stopWord.includes(e) && !allChar.includes(e)) newData.push(e)
+    })
+    return newData.join(' ')
+}
+const sanitizePdf = (text) => {
+    const textFix = tokenizer.tokenize(text)
+    const newData = []
+    textFix.forEach(e => {
+        // e.trim()
+        if (e.length > 2 && !stopWord.includes(e)) newData.push(stemmer.stem(e))
+    })
+    return newData.join(' ')
+}
+
+module.exports = {
+    File,
+    sanitizePdf
+}
+
+-models/user.js
+const mongoose = require('mongoose')
+const mongoosePaginate = require('mongoose-paginate-v2');
+const bcrypt = require('bcryptjs')
+
+require('../utils/db')
+
+const userSchema = new mongoose.Schema( {
+    name : {
+        type : String,
+        required : true,
+    },
+    uid : {
+        type : String,
+        required : true,
+    },
+    password : {
+        type : String,
+        required : true,
+    },
+})
+userSchema.plugin(mongoosePaginate)
+const User = mongoose.model('User', userSchema )
+
+
+const salt = bcrypt.genSaltSync(10)
+
+const verifyPassword = (password, h) => {
+    return bcrypt.compare(password, h)
+}
+
+const createPassword = (password) => {
+    return bcrypt.hashSync(password, salt)
+}
+
+module.exports = {
+    User,
+    userSchema,
+    verifyPassword,
+    createPassword
+}
+
+-routes/activity.js
+const express = require('express')
+const multer = require('multer')
+const fileUpload = require('express-fileupload')
+
+const {home} = require('../controllers/homeController')
+const {loginView, loginAuth, logout} = require('../controllers/loginController')
+const {admin, addUser, deleteUser, updateUser, updateUserByUser, pagination, paginationUser, paginationFile, allUser} = require('../controllers/adminController')
+const {uploadPdf, deletePdf, result, resultNone} = require('../controllers/fileController')
+
+const {toLogin, toAddUser, toUpdateUser, toUpdateUserByUser, verifyToken} = require('../middleware/user')
+const {adminVerify} = require('../middleware/admin')
+const { toAddFile } = require('../middleware/file')
+const { fileStorage, fileFilter, fileStorageRes } = require('../config/fileConfig')
+
+const uploadFile = multer({
+    storage : fileStorage,
+    fileFilter : fileFilter
+}).single('upload')
+
+const uploadFileRes = multer({
+    storage : fileStorageRes,
+    fileFilter : fileFilter
+}).single('upload-res')
+
+const router = express.Router()
+
+router.get('/', home)
+router.post('/result', uploadFileRes, result)
+router.post('/result-none', fileUpload(), resultNone)
+router.put('/user', toUpdateUserByUser, updateUserByUser)
+
+router.get('/login', loginView)
+router.post('/login', toLogin,  loginAuth)
+router.get('/logout', logout)
+
+router.post('/pdf', uploadFile, toAddFile, uploadPdf)
+router.delete('/pdf', deletePdf)
+
+router.get('/user', paginationUser)
+router.get('/file', paginationFile)
+router.get('/all-user', allUser)
+
+router.use(adminVerify)
+router.get('/admin', admin)
+router.post('/admin-user', toAddUser, addUser)
+router.put('/admin-user', toUpdateUser, updateUser)
+router.delete('/admin-user', deleteUser)
+
+
+module.exports = router
+
+-utils/db.js
+require('dotenv').config()
+const mongoose = require('mongoose')
+const URI = process.env.MONGODB_URL
+const DB = 'latihan'
+
+mongoose.connect(URI, {
+// mongoose.connect(`${URI}/${DB}`, {
+    useNewUrlParser : true,
+    useUnifiedTopology : true,
+})
+
+-utils/stopWord.js
+const stopWord = ["ada","adalah","adanya","adapun","agak","agaknya","agar","akan","akankah","akhir","akhiri","akhirnya","aku","akulah","amat","amatlah","anda","andalah","antar","antara","antaranya","apa","apaan","apabila","apakah","apalagi","apatah","artinya","asal","asalkan","atas","atau","ataukah","ataupun","awal","awalnya","bagai","bagaikan","bagaimana","bagaimanakah","bagaimanapun","bagi","bagian","bahkan","bahwa","bahwasanya","baik","bakal","bakalan","balik","banyak","bapak","baru","bawah","beberapa","begini","beginian","beginikah","beginilah","begitu","begitukah","begitulah","begitupun","bekerja","belakang","belakangan","belum","belumlah","benar","benarkah","benarlah","berada","berakhir","berakhirlah","berakhirnya","berapa","berapakah","berapalah","berapapun","berarti","berawal","berbagai","berdatangan","beri","berikan","berikut","berikutnya","berjumlah","berkali-kali","berkata","berkehendak","berkeinginan","berkenaan","berlainan","berlalu","berlangsung","berlebihan","bermacam","bermacam-macam","bermaksud","bermula","bersama","bersama-sama","bersiap","bersiap-siap","bertanya","bertanya-tanya","berturut","berturut-turut","bertutur","berujar","berupa","besar","betul","betulkah","biasa","biasanya","bila","bilakah","bisa","bisakah","boleh","bolehkah","bolehlah","buat","bukan","bukankah","bukanlah","bukannya","bulan","bung","cara","caranya","cukup","cukupkah","cukuplah","cuma","dahulu","dalam","dan","dapat","dari","daripada","datang","dekat","demi","demikian","demikianlah","dengan","depan","di","dia","diakhiri","diakhirinya","dialah","diantara","diantaranya","diberi","diberikan","diberikannya","dibuat","dibuatnya","didapat","didatangkan","digunakan","diibaratkan","diibaratkannya","diingat","diingatkan","diinginkan","dijawab","dijelaskan","dijelaskannya","dikarenakan","dikatakan","dikatakannya","dikerjakan","diketahui","diketahuinya","dikira","dilakukan","dilalui","dilihat","dimaksud","dimaksudkan","dimaksudkannya","dimaksudnya","diminta","dimintai","dimisalkan","dimulai","dimulailah","dimulainya","dimungkinkan","dini","dipastikan","diperbuat","diperbuatnya","dipergunakan","diperkirakan","diperlihatkan","diperlukan","diperlukannya","dipersoalkan","dipertanyakan","dipunyai","diri","dirinya","disampaikan","disebut","disebutkan","disebutkannya","disini","disinilah","ditambahkan","ditandaskan","ditanya","ditanyai","ditanyakan","ditegaskan","ditujukan","ditunjuk","ditunjuki","ditunjukkan","ditunjukkannya","ditunjuknya","dituturkan","dituturkannya","diucapkan","diucapkannya","diungkapkan","dong","dua","dulu","empat","enggak","enggaknya","entah","entahlah","guna","gunakan","hal","hampir","hanya","hanyalah","hari","harus","haruslah","harusnya","hendak","hendaklah","hendaknya","hingga","ia","ialah","ibarat","ibaratkan","ibaratnya","ibu","ikut","ingat","ingat-ingat","ingin","inginkah","inginkan","ini","inikah","inilah","itu","itukah","itulah","jadi","jadilah","jadinya","jangan","jangankan","janganlah","jauh","jawab","jawaban","jawabnya","jelas","jelaskan","jelaslah","jelasnya","jika","jikalau","juga","jumlah","jumlahnya","justru","kala","kalau","kalaulah","kalaupun","kalian","kami","kamilah","kamu","kamulah","kan","kapan","kapankah","kapanpun","karena","karenanya","kasus","kata","katakan","katakanlah","katanya","ke","keadaan","kebetulan","kecil","kedua","keduanya","keinginan","kelamaan","kelihatan","kelihatannya","kelima","keluar","kembali","kemudian","kemungkinan","kemungkinannya","kenapa","kepada","kepadanya","kesampaian","keseluruhan","keseluruhannya","keterlaluan","ketika","khususnya","kini","kinilah","kira","kira-kira","kiranya","kita","kitalah","kok","kurang","lagi","lagian","lah","lain","lainnya","lalu","lama","lamanya","lanjut","lanjutnya","lebih","lewat","lima","luar","macam","maka","makanya","makin","malah","malahan","mampu","mampukah","mana","manakala","manalagi","masa","masalah","masalahnya","masih","masihkah","masing","masing-masing","mau","maupun","melainkan","melakukan","melalui","melihat","melihatnya","memang","memastikan","memberi","memberikan","membuat","memerlukan","memihak","meminta","memintakan","memisalkan","memperbuat","mempergunakan","memperkirakan","memperlihatkan","mempersiapkan","mempersoalkan","mempertanyakan","mempunyai","memulai","memungkinkan","menaiki","menambahkan","menandaskan","menanti","menanti-nanti","menantikan","menanya","menanyai","menanyakan","mendapat","mendapatkan","mendatang","mendatangi","mendatangkan","menegaskan","mengakhiri","mengapa","mengatakan","mengatakannya","mengenai","mengerjakan","mengetahui","menggunakan","menghendaki","mengibaratkan","mengibaratkannya","mengingat","mengingatkan","menginginkan","mengira","mengucapkan","mengucapkannya","mengungkapkan","menjadi","menjawab","menjelaskan","menuju","menunjuk","menunjuki","menunjukkan","menunjuknya","menurut","menuturkan","menyampaikan","menyangkut","menyatakan","menyebutkan","menyeluruh","menyiapkan","merasa","mereka","merekalah","merupakan","meski","meskipun","meyakini","meyakinkan","minta","mirip","misal","misalkan","misalnya","mula","mulai","mulailah","mulanya","mungkin","mungkinkah","nah","naik","namun","nanti","nantinya","nyaris","nyatanya","oleh","olehnya","pada","padahal","padanya","pak","paling","panjang","pantas","para","pasti","pastilah","penting","pentingnya","per","percuma","perlu","perlukah","perlunya","pernah","persoalan","pertama","pertama-tama","pertanyaan","pertanyakan","pihak","pihaknya","pukul","pula","pun","punya","rasa","rasanya","rata","rupanya","saat","saatnya","saja","sajalah","saling","sama","sama-sama","sambil","sampai","sampai-sampai","sampaikan","sana","sangat","sangatlah","satu","saya","sayalah","se","sebab","sebabnya","sebagai","sebagaimana","sebagainya","sebagian","sebaik","sebaik-baiknya","sebaiknya","sebaliknya","sebanyak","sebegini","sebegitu","sebelum","sebelumnya","sebenarnya","seberapa","sebesar","sebetulnya","sebisanya","sebuah","sebut","sebutlah","sebutnya","secara","secukupnya","sedang","sedangkan","sedemikian","sedikit","sedikitnya","seenaknya","segala","segalanya","segera","seharusnya","sehingga","seingat","sejak","sejauh","sejenak","sejumlah","sekadar","sekadarnya","sekali","sekali-kali","sekalian","sekaligus","sekalipun","sekarang","sekarang","sekecil","seketika","sekiranya","sekitar","sekitarnya","sekurang-kurangnya","sekurangnya","sela","selain","selaku","selalu","selama","selama-lamanya","selamanya","selanjutnya","seluruh","seluruhnya","semacam","semakin","semampu","semampunya","semasa","semasih","semata","semata-mata","semaunya","sementara","semisal","semisalnya","sempat","semua","semuanya","semula","sendiri","sendirian","sendirinya","seolah","seolah-olah","seorang","sepanjang","sepantasnya","sepantasnyalah","seperlunya","seperti","sepertinya","sepihak","sering","seringnya","serta","serupa","sesaat","sesama","sesampai","sesegera","sesekali","seseorang","sesuatu","sesuatunya","sesudah","sesudahnya","setelah","setempat","setengah","seterusnya","setiap","setiba","setibanya","setidak-tidaknya","setidaknya","setinggi","seusai","sewaktu","siap","siapa","siapakah","siapapun","sini","sinilah","soal","soalnya","suatu","sudah","sudahkah","sudahlah","supaya","tadi","tadinya","tahu","tahun","tak","tambah","tambahnya","tampak","tampaknya","tandas","tandasnya","tanpa","tanya","tanyakan","tanyanya","tapi","tegas","tegasnya","telah","tempat","tengah","tentang","tentu","tentulah","tentunya","tepat","terakhir","terasa","terbanyak","terdahulu","terdapat","terdiri","terhadap","terhadapnya","teringat","teringat-ingat","terjadi","terjadilah","terjadinya","terkira","terlalu","terlebih","terlihat","termasuk","ternyata","tersampaikan","tersebut","tersebutlah","tertentu","tertuju","terus","terutama","tetap","tetapi","tiap","tiba","tiba-tiba","tidak","tidakkah","tidaklah","tiga","tinggi","toh","tunjuk","turut","tutur","tuturnya","ucap","ucapnya","ujar","ujarnya","umum","umumnya","ungkap","ungkapnya","untuk","usah","usai","waduh","wah","wahai","waktu","waktunya","walau","walaupun","wong","yaitu","yakin","yakni","yang"]
+
+module.exports = {
+    stopWord
+}
+
+-views/partials/add-files.ejs
+<div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto "
+    id="addFilesModal" tabindex="-1" aria-labelledby="addFilesModalTitle" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered relative w-auto pointer-events-none">
+        <div
+            class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-sky-800 bg-clip-padding rounded-md outline-none text-current backdrop-filter backdrop-blur-lg bg-opacity-30">
+            <div
+                class="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-700 rounded-t-md  backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <h5 class="text-xl font-medium leading-normal text-sky-200" id="exampleModalScrollableLabel">
+                    Add Files
+                </h5>
+                <button type="button"
+                    class="btn-close box-content w-4 h-4 p-1 text-black border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-black hover:opacity-75 hover:no-underline"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body relative bg-sky-800 p-4 backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <form action="/pdf" method="POST" enctype="multipart/form-data">
+                    <div class="w-full px-4 mb-8">
+                        <label for="id" class="text-base font-thin text-white">Title</label>
+                        <input type="text" name="title" id="id"
+                            class="w-full bg-sky-700 text-sky-200 p-3 rounded-md focus:outline-none focus:ring-sky-400 focus:ring-1" />
+                    </div>
+                    <div class="w-full my-5 px-4 flex items-center justify-between text-sky-200">
+                        <label for="upload">Upload Your File (*.pdf)</label>
+                        <input
+                            class="file:bg-sky-700 file:border-0 file:text-white file:rounded-md file:p-2 file:hover:bg-sky-600"
+                            type="file" name="upload">
+                    </div>
+            </div>
+            <div
+                class="modal-footer flex flex-shrink-0 flex-wrap items-center justify-end p-4 border-t border-sky-700 rounded-b-md bg-sky-800 backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <button type="submit" class="w-full bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600">
+                    Add File
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto "
+    id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileModalTitle" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered relative w-auto pointer-events-none  bg-opacity-30">
+        <div
+            class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-sky-800 bg-clip-padding rounded-md outline-none text-current backdrop-filter backdrop-blur-lg bg-opacity-30">
+            <div
+                class="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-700 rounded-t-md  bg-opacity-30">
+                <h5 class="text-xl font-medium leading-normal text-sky-200" id="exampleModalScrollableLabel">
+                    Delete File
+                </h5>
+                <button type="button"
+                    class="btn-close box-content w-4 h-4 p-1 text-white border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-black hover:opacity-75 hover:no-underline"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body relative bg-sky-800 p-4  bg-opacity-30">
+                <p id="text-delete-file" class="text-white text-base"></p>
+                <form action="/pdf?_method=DELETE" method="POST">
+                    <input type="hidden" id="del-file-id" name="id" value="">
+                    <input type="hidden" id="del-file-title" name="title" value="">
+            </div>
+            <div
+                class="modal-footer flex flex-shrink-0 flex-wrap items-center justify-end p-4 border-t border-gray-700 rounded-b-md bg-sky-800  bg-opacity-30">
+                <button type="submit" class="w-full bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600"
+                    id="modal-sub-user">
+                    Delete File
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+-views/partials/add-user.ejs
+<div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto "
+    id="addUserModal" tabindex="-1" aria-labelledby="addUserModalTitle" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered relative w-auto pointer-events-none bg-opacity-30">
+        <div
+            class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-sky-800 bg-clip-padding rounded-md outline-none text-current backdrop-filter backdrop-blur-lg bg-opacity-30">
+            <div
+                class="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-sky-700 rounded-t-md backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <h5 class="text-xl font-medium leading-normal text-sky-200" id="exampleModalScrollableLabel">
+                    Add User
+                </h5>
+                <button type="button"
+                    class="btn-close box-content w-4 h-4 p-1 text-black border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-black hover:opacity-75 hover:no-underline"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body relative bg-sky-800 p-4 backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <form id="form-user" action="/admin-user" method="POST">
+                    <input type="hidden" value="" name="id" id="id_user">
+                    <div class="w-full px-4 mb-8">
+                        <label for="id" class="text-base font-thin text-white">Id (NIM)</label>
+                        <input type="text" name="nim" id="nim_user"
+                            class="w-full bg-sky-700 text-sky-200 p-3 rounded-md focus:outline-none focus:ring-sky-400 focus:ring-1" />
+                    </div>
+                    <div class="w-full px-4 mb-8">
+                        <label for="name" class="text-base font-thin text-white">Username</label>
+                        <input type="text" name="name" id="username_user"
+                            class="w-full bg-sky-700 text-sky-200 p-3 rounded-md focus:outline-none focus:ring-sky-400 focus:ring-1" />
+                    </div>
+                    <div class="w-full px-4 mb-8">
+                        <label for="password" class="text-base font-thin text-white">Password</label>
+                        <input type="password" name="password" id="password_user" class=" w-full bg-sky-700 text-sky-200 p-3 rounded-md focus:outline-none
+                        focus:ring-sky-400 focus:ring-1 disabled:bg-sky-500" />
+                    </div>
+            </div>
+            <div
+                class="modal-footer flex flex-shrink-0 flex-wrap items-center justify-end p-4 border-t border-sky-700 rounded-b-md bg-sky-800 backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <button type="submit" class="w-full bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600"
+                    id="modal-sub-user">
+                    Add User
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto "
+    id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalTitle" aria-modal="true" role="dialog">
+    <div
+        class="modal-dialog modal-dialog-centered relative w-auto pointer-events-none backdrop-filter backdrop-blur-lg bg-opacity-30">
+        <div
+            class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-sky-800 bg-clip-padding rounded-md outline-none text-current backdrop-filter backdrop-blur-lg bg-opacity-30">
+            <div
+                class="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-sky-700 rounded-t-md backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <h5 class="text-xl font-medium leading-normal text-sky-200" id="exampleModalScrollableLabel">
+                    Delete User
+                </h5>
+                <button type="button"
+                    class="btn-close box-content w-4 h-4 p-1 text-white border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-black hover:opacity-75 hover:no-underline"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body relative bg-sky-800 p-4 backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <p id="text-delete" class="text-white text-base"></p>
+                <form action="/admin-user?_method=DELETE" method="POST">
+                    <input type="hidden" id="del-user-id" name="id" value="">
+                    <input type="hidden" id="del-user-name" name="name" value="">
+            </div>
+            <div
+                class="modal-footer flex flex-shrink-0 flex-wrap items-center justify-end p-4 border-t border-sky-700 rounded-b-md bg-sky-800 backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <button type="submit" class="w-full bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600"
+                    id="modal-sub-user">
+                    Delete User
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+-views/partials/description.ejs
+<!-- Description Section -->
+<section class="mt-10  min-h-8 lg:mt-0">
+    <div class="container">
+        <div class="flex flex-wrap items-center">
+            <div class="p-5 w-full h-40 lg:w-1/2 lg:h-full">
+                <% if (typeof user !== 'undefined') { %>
+                <h1 class="font-medium text-xl text-sky-900 my-auto">Selamat Datang <%= user %></h1>
+                <% } %>
+                <h1 class="font-bold text-2xl text-sky-900 my-auto">Plagiarism Checkers</h1>
+                <p class="text-base">Website Ini Menggunakan Metode Dice Similarity Untuk Mempersentasekan
+                    Kemiripian Dokumen atau Teks Anda
+                    dengan Dokumen yang Terdapat di Database</p>
+            </div>
+            <div class="w-full my-4 lg:w-1/2 p-3">
+                <div class="p-4">
+                    <!-- <form action="/result" method="POST" enctype="multipart/form-data"> -->
+                    <form action="/result-none" method="POST" enctype="multipart/form-data">
+                        <div class="w-full px-4">
+                            <div class="alert mt-2 bg-red-300 rounded-lg py-5 px-6 mb-3 text-base text-red-700 hidden items-center w-full alert-dismissible fade show"
+                                id="error-file" role="alert">
+                                Gagal Melakukan Pendeteksian
+                                <button type="button"
+                                    class="btn-close box-content w-4 h-4 p-1 ml-auto text-yellow-900 border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-yellow-900 hover:opacity-75 hover:no-underline"
+                                    data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            <textarea type="text" id="text"
+                                class="w-full bg-sky-800 text-white p-3 rounded-md h-48 focus:border-2 focus:border-sky-700 focus:outline-none resize-none"
+                                name="text" placeholder="Input Your Text"></textarea>
+                        </div>
+                        <div class="w-full my-5 px-4 flex items-center justify-between">
+                            <label for="upload">or Upload Your File (*.pdf)</label>
+                            <input
+                                class="file:bg-sky-800 file:border-0 file:text-white file:rounded-md file:p-2 file:hover:bg-sky-700"
+                                type="file" name="upload-res" id="upload-res">
+                        </div>
+                        <button type="submit" id="check"
+                            class="w-full bg-sky-800 py-2 rounded-lg text-white hover:bg-sky-700">
+                            <i class="fa-solid fa-magnifying-glass mr-2"></i> Check
+                            Plagiarism</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<!-- Description Section -->
+
+-views/partials/footer.ejs
+<footer class="bg-sky-900 pt-10 pb-5 mt-3">
+    <div class="container">
+        <div class="w-full pt-10 border-t border-sky-700">
+            <div class="flex items-center justify-center mb-5">
+                <!-- Whatsapp -->
+                <a href="https://wa.me/+6282195008936" target="_blank"
+                    class="w-9 h-9 mr-2 flex justify-center items-center">
+                    <svg role="img" width="25" class="fill-white hover:fill-sky-700" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <title>WhatsApp</title>
+                        <path
+                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                    </svg>
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=100000053025926" target="_blank"
+                    class="w-9 h-9 mr-3 flex justify-center items-center">
+                    <svg role="img" width="25" viewBox="0 0 24 24" class="fill-white hover:fill-sky-700"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <title>Facebook</title>
+                        <path
+                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                    </svg>
+                </a>
+                <a href="https://github.com/arxs-abd" target="_blank"
+                    class="w-9 h-9 mr-3 flex justify-center items-center">
+                    <svg role="img" width="25" class="fill-white hover:fill-sky-700" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <title>GitHub</title>
+                        <path
+                            d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                    </svg>
+                </a>
+            </div>
+            <p class="font-medium text-xs text-sky-100 text-center">
+                © <script>
+                    document.write(new Date().getFullYear())
+                </script> Copyright : <span class="font-light">Aris Akhyar Abdillah</span>
+            </p>
+        </div>
+    </div>
+</footer>
+
+-views/partials/login.ejs
+<section>
+    <div class="container">
+        <div class="w-3/4 my-4 lg:w-2/3 lg:mx-auto p-3 text-white bg-sky-800 rounded-md m-auto">
+            <h2 class="font-semibold text-2xl mb-2 text-center">Login To Application</h2>
+            <div class="p-4">
+                <% if(errors.length !== 0) {  %>
+                <div class="alert bg-red-300 rounded-lg py-5 px-6 mb-3 text-base text-red-700 inline-flex items-center w-full alert-dismissible fade show"
+                    role="alert">
+                    <strong class="mx-1">NIM </strong> or
+                    <strong class="mx-1">Password </strong> is Wrong
+                    <button type="button"
+                        class="btn-close box-content w-4 h-4 p-1 ml-auto text-yellow-900 border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-yellow-900 hover:opacity-75 hover:no-underline"
+                        data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <% }  %>
+                <form action="/login" method="POST">
+                    <div class="w-full px-4 mb-8">
+                        <label for="id" class="text-base font-thin text-white">Id (NIM)</label>
+                        <input type="text" name="nim" id="id"
+                            class="w-full bg-sky-700 text-sky-200 p-3 rounded-md focus:outline-none focus:ring-sky-400 focus:ring-1" />
+                    </div>
+                    <div class="w-full px-4 mb-8">
+                        <label for="password" class="text-base font-thin text-white">Password</label>
+                        <input type="password" name="password" id="password" class=" w-full bg-sky-700 text-sky-200 p-3 rounded-md focus:outline-none
+                        focus:ring-sky-400 focus:ring-1" />
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+-views/partials/navbar.ejs
+<header
+    class="bg-sky-900 top-0 left-0 w-full flex items-center p-1 backdrop-filter backdrop-blur-lg bg-opacity-90 border-b border-sky-800">
+    <!-- class="bg-sky-900 top-0 left-0 w-full flex items-center p-1 backdrop-filter backdrop-blur-lg bg-opacity-90 border-b border-sky-800 sticky z-10"> -->
+    <div class="container">
+        <div class="flex items-center justify-between">
+            <div class="w-full ml-5 lg:ml-0">
+                <a href="/" class="block font-bold text-xl text-white py-4">Plagiarsm Checker</a>
+            </div>
+            <button id="hamburger" name="hamburger" type="button" class="absolute right-10 block lg:hidden">
+                <span class="hamburger-line origin-top-left transition duration-300 ease-in-out"></span>
+                <span class="hamburger-line transition duration-300 ease-in-out"></span>
+                <span class="hamburger-line origin-bottom-left transition duration-300 ease-in-out"></span>
+            </button>
+            <nav id="nav-menu"
+                class="absolute right-4 hidden top-full w-full max-w-[250px] rounded-lg bg-white py-5 shadow-lg -mt-3 lg:static lg:block lg:max-w-full lg:rounded-none lg:bg-transparent lg:shadow-none">
+                <ul class="lg:flex lg:justify-end lg:text-white">
+                    <li class="mx-1 lg:mx-3 p-2 hover:bg-sky-700 hover:text-white hover:rounded-xl"><a href="/">Home</a>
+                    </li>
+                    <li class="mx-1 lg:mx-3 p-2 hover:bg-sky-700 hover:text-white hover:rounded-xl "><a
+                            href="#about-me">About Me</a>
+                    <li class="mx-1 lg:mx-3 p-2 hover:bg-sky-700 hover:text-white hover:rounded-xl "><a
+                            href="https://github.com/arxs-abd/Main-Skripsi">How It
+                            Works</a>
+                    </li>
+                    <li
+                        class="mx-1 lg:mx-3 py-2 px-4 bg-sky-900  text-white rounded-xl hover:bg-sky-700 hover:text-white">
+                        <% if (typeof user !== 'undefined') { %>
+                        <a href="/logout">Logout</a>
+                        <% } else {%>
+                        <a href="/login">Login</a>
+                        <% }%>
+                    </li>
+                </ul>
+            </nav>
+            <!-- <nav class="text-white font-normal">
+                <ul class="lg:flex hidden">
+                    <li class="mx-1 lg:mx-3 p-2 hover:bg-sky-700 hover:rounded-xl"><a href="/">Home</a></li>
+                    <li class="mx-1 lg:mx-3 p-2 hover:bg-sky-700 hover:rounded-xl "><a href="#about-me">About Me</a>
+                    <li class="mx-1 lg:mx-3 p-2 hover:bg-sky-700 hover:rounded-xl "><a href="#about-me">How It
+                            Works</a>
+                    </li>
+                    <li class="mx-1 lg:mx-3 py-2 px-4 bg-sky-900  text-white rounded-xl hover:bg-sky-700">
+                        < if (typeof user !== 'undefined') { %>
+                        <a href="/logout">Logout</a>
+                        < } else {%>
+                        <a href="/login">Login</a>
+                        < }%>
+                    </li>
+                </ul>
+            </nav> -->
+        </div>
+    </div>
+</header>
+
+<script>
+    document.querySelector('#hamburger').addEventListener('click', function () {
+        this.classList.toggle('hamburger-active')
+        document.querySelector('#nav-menu').classList.toggle('hidden')
+    })
+</script>
+
+-views/partials/result-none.ejs
+<div id="spinner" class="fixed top-0 left-0 hidden items-center justify-center w-[100%] h-[100%] bg-black opacity-50">
+    <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-white" role="status">
+        <span class="visually-hidden text-white">Loading...</span>
+    </div>
+    <span id="loading-number" class="ml-5 text-base text-white">Loading</span>
+</div>
+<section id="result-none" class="pt-20 text-white hidden">
+    <div class="container">
+        <div class="w-full px-4 text-center">
+            <h1 class="font-semibold text-2xl mb-2 text-sky-900">Result</h1>
+        </div>
+        <div class="flex flex-wrap justify-between">
+            <div class="w-full h-[45rem]  lg:w-[59%] lg:h-[25rem] bg-sky-800 rounded-md p-4">
+                <embed src="" id="preview" class="w-full h-full">
+            </div>
+            <div class="w-full lg:w-[39%] rounded-md flex flex-col">
+                <!-- <div class="bg-red-300 rounded-lg py-5 px-6 mb-4 text-base text-red-700" role="alert">
+                    Your Document Is Unique
+                </div> -->
+                <div class="w-full bg-sky-800 rounded-md p-4 mt-5 lg:mt-0">
+                    <div class="flex flex-wrap justify-between">
+                        <h2 class="font-semibold text-xl mb-3">Details</h2>
+                    </div>
+                    <div class="flex flex-col">
+                        <p class="text-base" id="file-name">File Name : Namanya</p>
+                        <p class="text-base" id="file-size">File Size : Namanya</p>
+                        <p class="text-base" id="file-char">Character : Jumlahya %></p>
+                        <p class="text-base" id="file-word">Words : Katanya </p>
+                    </div>
+                </div>
+
+                <div class="w-full  bg-sky-800 rounded-md p-4 mt-5">
+                    <h2 class="font-semibold text-xl mb-3">Plagirsm Percentage</h2>
+                    <div class="">
+                        <div class="flex">
+                            <p class="text-base w-1/2">Unique : <span id="text-uniq">10</span> %</p>
+                            <p class="text-base w-1/2">Plagiarism : <span id="text-plag">10</span> %</p>
+                        </div>
+                        <div class="w-full mt-3 flex bg-sky-900 rounded-full">
+                            <div class="bg-sky-700 text-s font-medium text-blue-100 text-center p-0.5 leading-none rounded-l-full"
+                                id="bar-uniq" style="width: 10%;">
+                                10 %
+                            </div>
+                            <div class="text-s font-medium text-blue-100 text-center p-0.5 leading-none"
+                                style="width: 90%;" id="bar-plag">
+                                90 %
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full bg-sky-800 mt-5 rounded-md p-4 mb-5">
+                <h2 class="font-semibold text-xl mb-3">File With High Similarity</h2>
+                <table class="min-w-full text-white table-auto">
+                    <thead class="border-b border-sky-500 font-semibold">
+                        <tr>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                #
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Title Pdf
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Uploader
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Similarity
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Show
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-result">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+-views/partials/result.ejs
+<section class="pt-20 text-white">
+    <div class="container">
+        <div class="w-full px-4 text-center">
+            <h1 class="font-semibold text-2xl mb-2">Result</h1>
+        </div>
+        <div class="flex flex-wrap justify-between">
+            <div class="w-full lg:w-[49%] bg-sky-800 rounded-md p-4">
+                <h2 class="font-semibold text-xl mb-3">Details</h2>
+                <div class="flex flex-col">
+                    <p class="text-base">File Name : <%= result.fileInformation.originalname %></p>
+                    <p class="text-base">Character : <%= result.fileInformation.length  %></p>
+                    <p class="text-base">Words :
+                        <%= result.fileInformation.word  %></p>
+                </div>
+            </div>
+            <div class="w-full mt-5 lg:w-[49%] lg:mt-0 bg-sky-800 rounded-md p-4">
+                <h2 class="font-semibold text-xl mb-3">Plagirsm Percentage</h2>
+                <div class="flex">
+                    <p class="text-base w-1/2">Unique : <%= `${100 - result.plag}%` %></p>
+                    <p class="text-base w-1/2">Plagiarism : <%= `${result.plag}%` %></p>
+                </div>
+                <div class="w-full mt-3 flex bg-sky-900 rounded-full">
+                    <div class="bg-sky-700 text-s font-medium text-blue-100 text-center p-0.5 leading-none rounded-l-full w-[80%]"
+                        style="width: <%= `${100 - result.plag}%` %>;">
+                        <%= `${100 - result.plag}%` %>
+                    </div>
+                    <div class="text-s font-medium text-blue-100 text-center p-0.5 leading-none"
+                        style="width: <%= `${result.plag}%` %>;">
+                        <%= `${result.plag}%` %>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full bg-sky-800 mt-5 rounded-md p-4">
+                <h2 class="font-semibold text-xl mb-3">File With High Similarity</h2>
+                <table class="min-w-full text-white table-auto">
+                    <thead class="border-b border-sky-500 font-semibold">
+                        <tr>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                #
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Title Pdf
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Uploader
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Similarity
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Show
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% result.resultAll.forEach((file, i) => { %>
+                        <tr class="border-b border-sky-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><%= i + 1 %></td>
+                            <td class="text-sm font-light px-6 py-4">
+                                <%= file.file.name %>
+                            </td>
+                            <td class="text-sm font-light px-6 py-4">
+                                <% const index = user.findIndex(o => { %>
+                                <% return o._id.toHexString() === file.file.uploader %>
+                                <% }) %>
+                                <%= user[index].name %>
+                            </td>
+                            <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                <%= file.result %>%
+                            </td>
+                            <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                <a href="<%= 'docs/' + file.file.fileName %>" target="_blank"
+                                    class="w-full bg-sky-700 p-3 rounded-lg text-white">
+                                    Show
+                                </a>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+-views/partials/table-details.ejs
+<section>
+    <div class="container mb-5">
+        <div class="flex flex-wrap justify-between">
+            <div class="w-[95%] mx-auto bg-sky-800 lg:w-[49%] mt-5 rounded-md p-4">
+                <div class="flex flex-wrap flex-row items-center justify-between">
+                    <h2 class="font-semibold text-xl mb-3 text-white">All User</h2>
+                    <button type="button" class="w-1/2 bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600"
+                        id="modal-user" data-bs-toggle="modal" data-bs-target="#addUserModal"><i
+                            class="fas fa-plus mr-3"></i>Add
+                        User</button>
+                </div>
+                <% if(errorsUser.length !== 0) {  %>
+                <div class="alert mt-2 bg-red-300 rounded-lg py-5 px-6 mb-3 text-base text-red-700 inline-flex items-center w-full alert-dismissible fade show"
+                    role="alert">
+                    <%= errorsUser %>
+                    <button type="button"
+                        class="btn-close box-content w-4 h-4 p-1 ml-auto text-yellow-900 border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-yellow-900 hover:opacity-75 hover:no-underline"
+                        data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <% }  %>
+
+                <% if(successUser.length !== 0) {  %>
+                <div class="alert mt-2 bg-green-300 rounded-lg py-5 px-6 mb-3 text-base text-green-700 inline-flex items-center w-full alert-dismissible fade show"
+                    role="alert">
+                    <%= successUser %>
+                    <button type="button"
+                        class="btn-close box-content w-4 h-4 p-1 ml-auto text-yellow-900 border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-yellow-900 hover:opacity-75 hover:no-underline"
+                        data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <% }  %>
+                <div class="overflow-y-auto flex flex-col">
+                    <table class="min-w-full text-white table-auto">
+                        <thead class="border-b border-sky-500 font-semibold">
+                            <tr>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    #
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Username
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Id (NIM)
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-user">
+                        </tbody>
+                    </table>
+
+                    <div class="paginaton mt-3 min-w-full">
+                        <div class="flex justify-center">
+                            <nav aria-label="Page navigation example">
+                                <ul class="flex list-style-none gap-1">
+                                    <li class="page-item"><a
+                                            class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                            href="#" aria-label="First" data-page="false" data-click="false">
+                                            <span aria-hidden="true">First</span>
+                                        </a></li>
+                                    <li class="page-item"><a
+                                            class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                            href="#" aria-label="Previous" data-page="false" data-click="false">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a></li>
+                                    <li class="page-item"><a
+                                            class="page-link relative block py-1.5 px-3 rounded border-0 bg-sky-900 outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                            data-click="false" href="#">1</a></li>
+                                    <li class="page-item"><a
+                                            class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                            data-click="false" href="#">2</a></li>
+                                    <li class="page-item"><a
+                                            class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                            data-click="false" href="#">3</a></li>
+                                    <li class="page-item"><a
+                                            class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                            href="#" aria-label="Next" data-click="false">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a></li>
+                                    <li class="page-item"><a
+                                            class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                            href="#" aria-label="Last" data-page="false" data-click="false">
+                                            <span aria-hidden="true">Last</span>
+                                        </a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-[95%] mx-auto h-fit bg-sky-800 lg:w-[49%] mt-5 rounded-md p-4 overflow-y-auto">
+                <div class="flex flex-wrap flex-row items-center justify-between">
+                    <h2 class="font-semibold text-xl mb-3 text-white">All Files</h2>
+                    <button type="button" class="w-1/2 bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600"
+                        data-bs-toggle="modal" data-bs-target="#addFilesModal">
+                        <i class="fas fa-plus mr-3"></i>Add
+                        Files</button>
+                </div>
+                <% if(errorsFile.length !== 0) {  %>
+                <div class="alert mt-2 bg-red-300 rounded-lg py-5 px-6 mb-3 text-base text-red-700 inline-flex items-center w-full alert-dismissible fade show"
+                    role="alert">
+                    <%= errorsFile %>
+                    <button type="button"
+                        class="btn-close box-content w-4 h-4 p-1 ml-auto text-yellow-900 border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-yellow-900 hover:opacity-75 hover:no-underline"
+                        data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <% }  %>
+
+                <% if(successFile.length !== 0) {  %>
+                <div class="alert mt-2 bg-green-300 rounded-lg py-5 px-6 mb-3 text-base text-green-700 inline-flex items-center w-full alert-dismissible fade show"
+                    role="alert">
+                    <%= successFile %>
+                    <button type="button"
+                        class="btn-close box-content w-4 h-4 p-1 ml-auto text-yellow-900 border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-yellow-900 hover:opacity-75 hover:no-underline"
+                        data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <% }  %>
+                <table class="min-w-full text-white table-auto ">
+                    <thead class="border-b border-sky-500 font-semibold">
+                        <tr>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                #
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Title
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Uploader
+                            </th>
+                            <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-file">
+                        <% allFile.forEach((f, i) => { %>
+                        <%- include('table-file-row', { f : f, i : i, user : allUser }) %>
+                        <% }) %>
+                    </tbody>
+                </table>
+                <div class="paginaton mt-3 min-w-full">
+                    <div class="flex justify-center">
+                        <nav aria-label="Page navigation example">
+                            <ul class="flex list-style-none gap-1">
+                                <li class="page-item-file"><a
+                                        class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                        href="#" aria-label="First" data-page="false" data-click="false">
+                                        <span aria-hidden="true">First</span>
+                                    </a></li>
+                                <li class="page-item-file"><a
+                                        class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                        href="#" aria-label="Previous" data-page="false" data-click="false">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a></li>
+                                <li class="page-item-file"><a
+                                        class="page-link relative block py-1.5 px-3 rounded border-0 bg-sky-900 outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                        data-click="false" href="#">1</a></li>
+                                <li class="page-item-file"><a
+                                        class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                        data-click="false" href="#">2</a></li>
+                                <li class="page-item-file"><a
+                                        class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                        data-click="false" href="#">3</a></li>
+                                <li class="page-item-file"><a
+                                        class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                        href="#" aria-label="Next" data-click="false">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a></li>
+                                <li class="page-item-file"><a
+                                        class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                        href="#" aria-label="Last" data-page="false" data-click="false">
+                                        <span aria-hidden="true">Last</span>
+                                    </a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+-views/partials/table-file-row.ejs
+<tr class="border-b border-sky-500">
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><%= i + 1 %> </td>
+    <td class="text-sm font-light px-6 py-4">
+        <%= f.name %>
+    </td>
+    <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+        <% if (typeof user === 'string') { %>
+        <%= user %>
+        <% } else { %>
+        <% const index = user.findIndex(o => { %>
+        <% return o._id.toHexString() === f.uploader %>
+        <% }) %>
+        <%= user[index].name %>
+        <% } %>
+
+    </td>
+    <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+        <a href="docs/<%= f.fileName %> " target="_blank"
+            class="w-full mx-1 bg-sky-700 p-3 rounded-lg text-white hover:bg-green-500">
+            <i class="fa-solid fa-eye"></i>
+        </a>
+        <a href="" class="w-full mx-1 bg-sky-700 p-3 rounded-lg text-white hover:bg-red-500 delete-file"
+            data-id="<%= f._id  %>" data-name="<%= f.name %>" data-bs-toggle="modal" data-bs-target="#deleteFileModal">
+            <i class="fa-solid fa-trash"></i>
+        </a>
+    </td>
+</tr>
+
+-views/partials/table-user-row.ejs
+<tr class="border-b border-sky-500">
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><%= i + 1 %> </td>
+    <td class="text-sm font-light px-6 py-4">
+        <%= u.name %>
+    </td>
+    <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+        <%= u.uid %>
+    </td>
+    <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+        <a href="" data-id="<%= u._id %> " data-uid="<%= u.uid %>" data-name="<%= u.name %>"
+            class="w-full mx-1 bg-sky-700 p-3 rounded-lg text-white hover:bg-yellow-500 user-change"
+            data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fa-solid fa-pencil"></i>
+        </a>
+        <a href="" class="w-full mx-1 bg-sky-700 p-3 rounded-lg text-white hover:bg-red-500 delete-user"
+            data-id="<%= u._id %>" data-name="<%= u.name %> " data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+            <i class="fa-solid fa-trash"></i>
+        </a>
+    </td>
+</tr>
+
+-views/admin-page.ejs
+<%- include('partials/description') %>
+
+<%- include('partials/table-details') %>
+
+<%- include('partials/add-user') %>
+
+<%- include('partials/add-files') %>
+
+<script defer>
+    // User Modal
+    const userIdInput = document.querySelector('#id_user')
+    const userIdName = document.querySelector('#username_user')
+    const userIdNim = document.querySelector('#nim_user')
+    const userIdPass = document.querySelector('#password_user')
+    // const userChange = document.querySelectorAll('.user-change')
+    const modalUser = document.querySelector('#modal-user')
+    const userModalButton = document.querySelector('#modal-sub-user')
+    const formUserModal = document.querySelector('#form-user')
+    const modalTitle = document.querySelector('#exampleModalScrollableLabel')
+    // const deleteUser = document.querySelectorAll('.delete-user')
+    const idDeleteUser = document.querySelector('#del-user-id')
+    const nameDeleteUser = document.querySelector('#del-user-name')
+    const deleteText = document.querySelector('#text-delete')
+    // User Modal
+
+    // File Modal
+    const deleteFile = document.querySelectorAll('.delete-file')
+    const idDeleteFile = document.querySelector('#del-file-id')
+    const nameDeleteFile = document.querySelector('#del-file-title')
+    const deleteTextFile = document.querySelector('#text-delete-file')
+    // File Modal
+
+    // File Modal
+    deleteFile.forEach(file => {
+        file.addEventListener('click', e => {
+            e.preventDefault()
+            idDeleteFile.value = file.getAttribute('data-id')
+            nameDeleteFile.value = file.getAttribute('data-name')
+            deleteTextFile.textContent =
+                `Are You Sure Want Delete File With Title ${file.getAttribute('data-name')} ?`
+        })
+    })
+    // File Modal
+
+    // User Modal
+    modalUser.addEventListener('click', (e) => {
+        formUserModal.action = '/admin-user'
+        e.preventDefault()
+        userIdInput.value = ''
+        userIdNim.value = ''
+        userIdName.value = ''
+        userIdPass.disabled = false
+        modalTitle.textContent = 'Add User'
+        userModalButton.textContent = 'Add User'
+    })
+
+    // User Modal
+
+    // User Tabel
+    const tableUser = document.querySelector('#table-user')
+    const navigationUser = document.querySelectorAll('.page-item')
+    let currentPage = 0
+    let totalPage = 0
+    const limit = 5
+    updateUserTable(currentPage)
+
+    // File Tabel
+    const tableFile = document.querySelector('#table-file')
+    const navigationFile = document.querySelectorAll('.page-item-file')
+    let currentPageFile = 0
+    let totalPageFile = 0
+    const limitFile = 5
+    updateFileTable(currentPageFile)
+
+    async function updateFileTable(page) {
+        const result = await getApi(`/file?limit=${limitFile}&pages=${page}`)
+        const users = await getApi('/all-user')
+        // return console.log(user)
+        const data = result.data
+        currentPageFile = result.currentPage
+        totalPageFile = result.totalPages
+        tableFile.innerHTML = ''
+        let number = (currentPageFile * limitFile) + 1
+        for (const file of data) {
+            const uploader = users.find(function (user) {
+                return user._id === file.uploader
+            })
+            // console.log(uploader)
+            tableFile.innerHTML += `
+            <tr class="border-b border-sky-500">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${number}</td>
+                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">${file.name}</td>
+                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">${uploader.name}</td>
+                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                    <a href="docs/${file.fileName}" target="_blank"
+                        class="w-full mx-1 bg-sky-700 p-3 rounded-lg text-white hover:bg-green-500">
+                        <i class="fa-solid fa-eye"></i>
+                    </a>
+                    <a href="" class="w-full mx-1 bg-sky-700 p-3 rounded-lg text-white hover:bg-red-500 delete-file"
+                        data-id="${file._id}" data-name="${file.name}" data-bs-toggle="modal" data-bs-target="#deleteFileModal">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            `
+            number++
+        }
+        const deleteFile = document.querySelectorAll('.delete-file')
+        deleteFile.forEach(file => {
+            file.addEventListener('click', e => {
+                e.preventDefault()
+                idDeleteFile.value = file.getAttribute('data-id')
+                nameDeleteFile.value = file.getAttribute('data-name')
+                deleteTextFile.textContent =
+                    `Are You Sure Want Delete File With Title ${file.getAttribute('data-name')} ?`
+            })
+        })
+
+        let newCurrentPage = getNumberPage(currentPageFile, totalPageFile)
+        for (const nav of navigationFile) {
+            if (nav.children[0].ariaLabel === 'Previous') {
+                nav.children[0].dataset.page = (currentPageFile - 1)
+                if (nav.children[0].dataset.click === 'false') {
+                    pagingButtonListenerFile(nav.children[0], 'prev')
+                }
+            } else if (nav.children[0].ariaLabel === 'Next') {
+                nav.children[0].dataset.page = (currentPageFile + 1)
+                if (nav.children[0].dataset.click === 'false') {
+                    pagingButtonListenerFile(nav.children[0], 'next')
+                }
+            } else if (nav.children[0].ariaLabel === 'First') {
+                if (nav.children[0].dataset.click === 'false') {
+                    nav.addEventListener('click', e => {
+                        if (currentPageFile === 0) return e.preventDefault()
+                        updatePage(e, 1, 'file')
+                    })
+                    nav.children[0].dataset.click = 'true'
+                }
+            } else if (nav.children[0].ariaLabel === 'Last') {
+                if (nav.children[0].dataset.click === 'false') {
+                    nav.addEventListener('click', e => {
+                        if (currentPageFile === totalPageFile - 1) return e.preventDefault()
+                        updatePage(e, totalPageFile, 'file')
+                    })
+                    nav.children[0].dataset.click = 'true'
+                }
+            } else {
+                nav.children[0].textContent = newCurrentPage
+                if (currentPageFile + 1 === newCurrentPage) {
+                    removeIfExist(nav.children[0], 'bg-transparent')
+                    addIfNotExist(nav.children[0], 'bg-sky-900')
+                } else {
+                    removeIfExist(nav.children[0], 'bg-sky-900')
+                    addIfNotExist(nav.children[0], 'bg-transparent')
+                }
+
+                if (newCurrentPage > totalPageFile) nav.style.display = 'none'
+                // console.log(nav.children[0].dataset.click)
+                if (nav.children[0].dataset.click === 'false') {
+                    pagingButtonListenerFile(nav.children[0])
+                }
+                newCurrentPage++
+            }
+
+        }
+
+    }
+
+    async function updateUserTable(page) {
+        const result = await getApi(`/user?limit=${limit}&pages=${page}`)
+        const data = result.data
+        currentPage = result.currentPage
+        totalPage = result.totalPages
+        tableUser.innerHTML = ''
+        let number = (currentPage * limit) + 1
+        for (const user of data) {
+            tableUser.innerHTML += `
+                <tr class="border-b border-sky-500">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${number} </td>
+                    <td class="text-sm font-light px-6 py-4">
+                        ${user.name}
+                    </td>
+                    <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                        ${user.uid}
+                    </td>
+                    <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                        <a href="" data-id="${user._id}" data-uid="${user.uid}" data-name="${user.name}"
+                            class="w-full mx-1 bg-sky-700 p-3 rounded-lg text-white hover:bg-yellow-500 user-change"
+                            data-bs-toggle="modal" data-bs-target="#addUserModal">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                        <a href="" class="w-full mx-1 bg-sky-700 p-3 rounded-lg text-white hover:bg-red-500 delete-user"
+                            data-id="${user._id}" data-name="${user.name}" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                `
+            number++
+        }
+        const userChange = document.querySelectorAll('.user-change')
+        userChange.forEach(user => {
+            user.addEventListener('click', (e) => {
+                e.preventDefault()
+                formUserModal.action = '/admin-user?_method=PUT'
+                userIdInput.value = user.getAttribute('data-id')
+                userIdName.value = user.getAttribute('data-name')
+                userIdNim.value = user.getAttribute('data-uid')
+                userIdPass.disabled = true
+                userModalButton.textContent = 'Update User'
+                modalTitle.textContent = 'Update User'
+            })
+        })
+
+        const deleteUser = document.querySelectorAll('.delete-user')
+        deleteUser.forEach(user => {
+            user.addEventListener('click', e => {
+                e.preventDefault()
+                idDeleteUser.value = user.getAttribute('data-id')
+                nameDeleteUser.value = user.getAttribute('data-name')
+                deleteText.textContent =
+                    `Are You Sure Want Delete ${user.getAttribute('data-name')} ?`
+
+            })
+        })
+
+        let newCurrentPage = getNumberPage(currentPage, totalPage)
+
+        for (const nav of navigationUser) {
+            if (nav.children[0].ariaLabel === 'Previous') {
+                nav.children[0].dataset.page = (currentPage - 1)
+                if (nav.children[0].dataset.click === 'false') {
+                    pagingButtonListener(nav.children[0], 'prev')
+                }
+            } else if (nav.children[0].ariaLabel === 'Next') {
+                nav.children[0].dataset.page = (currentPage + 1)
+                if (nav.children[0].dataset.click === 'false') {
+                    pagingButtonListener(nav.children[0], 'next')
+                }
+            } else if (nav.children[0].ariaLabel === 'First') {
+                if (nav.children[0].dataset.click === 'false') {
+                    nav.addEventListener('click', e => {
+                        if (currentPage === 0) return e.preventDefault()
+                        updatePage(e, 1, 'user')
+                    })
+                    nav.children[0].dataset.click = 'true'
+                }
+            } else if (nav.children[0].ariaLabel === 'Last') {
+                if (nav.children[0].dataset.click === 'false') {
+                    nav.addEventListener('click', e => {
+                        if (currentPage === totalPage - 1) return e.preventDefault()
+                        updatePage(e, totalPage, 'user')
+                    })
+                    nav.children[0].dataset.click = 'true'
+                }
+            } else {
+                nav.children[0].textContent = newCurrentPage
+                if (currentPage + 1 === newCurrentPage) {
+                    removeIfExist(nav.children[0], 'bg-transparent')
+                    addIfNotExist(nav.children[0], 'bg-sky-900')
+                } else {
+                    removeIfExist(nav.children[0], 'bg-sky-900')
+                    addIfNotExist(nav.children[0], 'bg-transparent')
+                }
+
+                if (newCurrentPage > totalPage) nav.style.display = 'none'
+                // console.log(nav.children[0].dataset.click)
+                if (nav.children[0].dataset.click === 'false') {
+                    pagingButtonListener(nav.children[0])
+                }
+                newCurrentPage++
+            }
+
+        }
+
+    }
+
+    function pagingButtonListener(nav, option = '') {
+        nav.addEventListener('click', (e) => {
+            e.preventDefault()
+            if (option === 'next')
+                if (currentPage === (totalPage - 1)) return
+            if (option === 'prev')
+                if (currentPage === 0) return
+            updatePage(e, (Number(nav.dataset.page) + 1) || Number(nav.textContent), 'user')
+        })
+        nav.dataset.click = 'true'
+    }
+
+    function pagingButtonListenerFile(nav, option = '') {
+        nav.addEventListener('click', (e) => {
+            e.preventDefault()
+            if (option === 'next')
+                if (currentPageFile === (totalPageFile - 1)) return
+            if (option === 'prev')
+                if (currentPageFile === 0) return
+            updatePage(e, (Number(nav.dataset.page) + 1) || Number(nav.textContent), 'file')
+        })
+        nav.dataset.click = 'true'
+    }
+
+    function updatePage(e, page, table) {
+        e.preventDefault()
+        console.log(page - 1)
+        if (table === 'user') updateUserTable(page - 1)
+        else if (table === 'file') updateFileTable(page - 1)
+    }
+
+    async function getApi(url) {
+        const response = await fetch(url)
+        const result = await response.json()
+        return result
+    }
+
+    function getNumberPage(currentPage, totalPage) {
+        if (currentPage == 0) {
+            return currentPage + 1
+        }
+        if (currentPage + 1 == totalPage && totalPage > 2) {
+            return currentPage - 1
+        }
+        return currentPage
+    }
+
+    function prevent(e) {
+        e.preventDefault()
+    }
+
+    function removeIfExist(removeItem, removeClass) {
+        if (removeItem.classList.contains(removeClass)) removeItem.classList.remove(removeClass)
+    }
+
+    function addIfNotExist(addItem, addClass) {
+        if (!addItem.classList.contains(addClass)) addItem.classList.add(addClass)
+    }
+</script>
+
+-views/home-login.ejs
+<%- include('partials/description')  %>
+
+-views/home-page.ejs
+<%- include('partials/description') %>
+
+<% if (typeof user !== 'undefined') { if (user !== 'Admin') { %>
+
+<div class="container flex flex-wrap justify-between">
+    <div class="w-full bg-sky-800 lg:w-[49%]  mt-5 rounded-md p-4 overflow-y-auto">
+        <div class="flex flex-wrap flex-row items-center justify-between">
+            <h2 class="font-semibold text-xl mb-3 text-white">All Files</h2>
+            <button type="button" class="w-1/2 bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600"
+                data-bs-toggle="modal" data-bs-target="#addFilesModal">
+                <i class="fas fa-plus mr-3"></i>Add
+                Files</button>
+        </div>
+
+        <% if(typeof errorsFile !== 'undefined') { if(errorsFile.length !== 0) {  %>
+        <div class="alert mt-2 bg-red-300 rounded-lg py-5 px-6 mb-3 text-base text-red-700 inline-flex items-center w-full alert-dismissible fade show"
+            role="alert">
+            <%= errorsFile %>
+            <button type="button"
+                class="btn-close box-content w-4 h-4 p-1 ml-auto text-yellow-900 border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-yellow-900 hover:opacity-75 hover:no-underline"
+                data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } } %>
+
+        <% if(typeof successFile !== 'undefined') { if(successFile.length !== 0) {  %>
+        <div class="alert mt-2 bg-green-300 rounded-lg py-5 px-6 mb-3 text-base text-green-700 inline-flex items-center w-full alert-dismissible fade show"
+            role="alert">
+            <%= successFile %>
+            <button type="button"
+                class="btn-close box-content w-4 h-4 p-1 ml-auto text-yellow-900 border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-yellow-900 hover:opacity-75 hover:no-underline"
+                data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } }  %>
+
+        <table class="min-w-full text-white table-auto">
+            <thead class="border-b border-sky-500 font-semibold">
+                <tr>
+                    <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                        #
+                    </th>
+                    <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                        Title
+                    </th>
+                    <!-- <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                        Uploader
+                    </th> -->
+                    <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="table-file">
+                <!-- <%# file.forEach((f, i) => { %> -->
+                <!-- <%# include('partials/table-file-row', { f : f, i : i }) %> -->
+                <!-- <# }) %> -->
+            </tbody>
+        </table>
+        <div class="paginaton mt-3 min-w-full">
+            <div class="flex justify-center">
+                <nav aria-label="Page navigation example">
+                    <ul class="flex list-style-none gap-1">
+                        <li class="page-item-file"><a
+                                class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                href="#" aria-label="First" data-page="false" data-click="false">
+                                <span aria-hidden="true">First</span>
+                            </a></li>
+                        <li class="page-item-file"><a
+                                class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                href="#" aria-label="Previous" data-page="false" data-click="false">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a></li>
+                        <li class="page-item-file"><a
+                                class="page-link relative block py-1.5 px-3 rounded border-0 bg-sky-900 outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                data-click="false" href="#">1</a></li>
+                        <li class="page-item-file"><a
+                                class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                data-click="false" href="#">2</a></li>
+                        <li class="page-item-file"><a
+                                class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                data-click="false" href="#">3</a></li>
+                        <li class="page-item-file"><a
+                                class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                href="#" aria-label="Next" data-click="false">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a></li>
+                        <li class="page-item-file"><a
+                                class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 text-white hover:text-white hover:bg-sky-900 focus:shadow-none"
+                                href="#" aria-label="Last" data-page="false" data-click="false">
+                                <span aria-hidden="true">Last</span>
+                            </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full h-max-[40px]  bg-sky-800 lg:w-[49%]  mt-5 rounded-md p-4">
+        <div class="flex flex-wrap flex-row items-center justify-between">
+            <h2 class="font-semibold text-xl mb-3 text-white">Profile</h2>
+        </div>
+
+        <% if(typeof errorsUpdate !== 'undefined') { if(errorsUpdate.length !== 0) {  %>
+        <div class="alert mt-2 bg-red-300 rounded-lg py-5 px-6 mb-3 text-base text-red-700 inline-flex items-center w-full alert-dismissible fade show"
+            role="alert">
+            <%= errorsUpdate %>
+            <button type="button"
+                class="btn-close box-content w-4 h-4 p-1 ml-auto text-yellow-900 border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-yellow-900 hover:opacity-75 hover:no-underline"
+                data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } } %>
+
+        <% if(typeof successUpdate !== 'undefined') { if(successUpdate.length !== 0) {  %>
+        <div class="alert mt-2 bg-green-300 rounded-lg py-5 px-6 mb-3 text-base text-green-700 inline-flex items-center w-full alert-dismissible fade show"
+            role="alert">
+            <%= successUpdate %>
+            <button type="button"
+                class="btn-close box-content w-4 h-4 p-1 ml-auto text-yellow-900 border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-yellow-900 hover:opacity-75 hover:no-underline"
+                data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } }  %>
+
+        <form action="/user?_method=PUT" method="POST">
+            <input type="hidden" name="_id" value="<%= details._id %>">
+            <div class="w-full px-4 mb-8">
+                <label for="id" class="text-base font-thin text-white">Id (NIM)</label>
+                <input type="text" name="nim" id="id" value="<%= details.uid %>"
+                    class="w-full bg-sky-700 text-sky-200 p-3 rounded-md focus:outline-none focus:ring-sky-400 focus:ring-1" />
+            </div>
+            <div class="w-full px-4 mb-8">
+                <label for="id" class="text-base font-thin text-white">Name</label>
+                <input type="text" name="name" id="name" value="<%= details.name %>"
+                    class="w-full bg-sky-700 text-sky-200 p-3 rounded-md focus:outline-none focus:ring-sky-400 focus:ring-1" />
+            </div>
+            <div class="w-full px-4 mb-8">
+                <label for="password" class="text-base font-thin text-white">Password</label>
+                <input type="password" name="password" id="password" class=" w-full bg-sky-700 text-sky-200 p-3 rounded-md focus:outline-none
+                focus:ring-sky-400 focus:ring-1" />
+            </div>
+            <button type="submit" class="w-full bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600">Update
+                Profile</button>
+        </form>
+
+    </div>
+</div>
+
+<div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto "
+    id="addFilesModal" tabindex="-1" aria-labelledby="addFilesModalTitle" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered relative w-auto pointer-events-none">
+        <div
+            class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-sky-800 bg-clip-padding rounded-md outline-none text-current backdrop-filter backdrop-blur-lg bg-opacity-30">
+            <div
+                class="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-700 rounded-t-md backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <h5 class="text-xl font-medium leading-normal text-sky-200" id="exampleModalScrollableLabel">
+                    Add Files
+                </h5>
+                <button type="button"
+                    class="btn-close box-content w-4 h-4 p-1 text-black border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-black hover:opacity-75 hover:no-underline"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body relative bg-sky-800 p-4">
+                <form action="/pdf" method="POST" enctype="multipart/form-data">
+                    <div class="w-full px-4 mb-8">
+                        <label for="id" class="text-base font-thin text-white">Title</label>
+                        <input type="text" name="title" id="id"
+                            class="w-full bg-sky-700 text-sky-200 p-3 rounded-md focus:outline-none focus:ring-sky-400 focus:ring-1" />
+                    </div>
+                    <div class="w-full my-5 px-4 flex items-center justify-between text-sky-200">
+                        <label for="upload">Upload Your File (*.pdf)</label>
+                        <input
+                            class="file:bg-sky-700 file:border-0 file:text-white file:rounded-md file:p-2 file:hover:bg-sky-600"
+                            type="file" name="upload">
+                    </div>
+            </div>
+            <div
+                class="modal-footer flex flex-shrink-0 flex-wrap items-center justify-end p-4 border-t border-gray-700 rounded-b-md bg-sky-800">
+                <button type="submit" class="w-full bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600">
+                    Add File
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto "
+    id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileModalTitle" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered relative w-auto pointer-events-none bg-opacity-30">
+        <div
+            class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-sky-800 bg-clip-padding rounded-md outline-none text-current backdrop-filter backdrop-blur-lg bg-opacity-30">
+            <div
+                class="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-700 rounded-t-md backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <h5 class="text-xl font-medium leading-normal text-sky-200" id="exampleModalScrollableLabel">
+                    Delete File
+                </h5>
+                <button type="button"
+                    class="btn-close box-content w-4 h-4 p-1 text-white border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-black hover:opacity-75 hover:no-underline"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body relative bg-sky-800 p-4 backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <p id="text-delete-file" class="text-white text-base"></p>
+                <form action="/pdf?_method=DELETE" method="POST">
+                    <input type="hidden" id="del-file-id" name="id" value="">
+                    <input type="hidden" id="del-file-title" name="title" value="">
+            </div>
+            <div
+                class="modal-footer flex flex-shrink-0 flex-wrap items-center justify-end p-4 border-t border-gray-700 rounded-b-md bg-sky-800 backdrop-filter backdrop-blur-lg bg-opacity-30">
+                <button type="submit" class="w-full bg-sky-700 py-2 rounded-lg text-white hover:bg-sky-600"
+                    id="modal-sub-user">
+                    Delete File
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const idDeleteFile = document.querySelector('#del-file-id')
+    const nameDeleteFile = document.querySelector('#del-file-title')
+    const deleteTextFile = document.querySelector('#text-delete-file')
+
+    const tableFile = document.querySelector('#table-file')
+    const navigationFile = document.querySelectorAll('.page-item-file')
+    let currentPageFile = 0
+    let totalPageFile = 0
+    const limitFile = 5
+    updateFileTable(currentPageFile)
+
+    async function updateFileTable(page) {
+        const result = await getApi(`/file?limit=${limitFile}&pages=${page}`)
+        // return console.log(result)
+        const data = result.data
+        currentPageFile = result.currentPage
+        totalPageFile = result.totalPages
+        tableFile.innerHTML = ''
+        let number = (currentPageFile * limitFile) + 1
+        for (const file of data) {
+            tableFile.innerHTML += `
+            <tr class="border-b border-sky-500">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${number}</td>
+                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">${file.name}</td>
+                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                    <a href="docs/${file.fileName}" target="_blank"
+                        class="w-full mx-1 bg-sky-700 p-3 rounded-lg text-white hover:bg-green-500">
+                        <i class="fa-solid fa-eye"></i>
+                    </a>
+                    <a href="" class="w-full mx-1 bg-sky-700 p-3 rounded-lg text-white hover:bg-red-500 delete-file"
+                        data-id="${file._id}" data-name="${file.name}" data-bs-toggle="modal" data-bs-target="#deleteFileModal">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            `
+            number++
+        }
+        const deleteFile = document.querySelectorAll('.delete-file')
+        deleteFile.forEach(file => {
+            file.addEventListener('click', e => {
+                e.preventDefault()
+                idDeleteFile.value = file.getAttribute('data-id')
+                nameDeleteFile.value = file.getAttribute('data-name')
+                deleteTextFile.textContent =
+                    `Are You Sure Want Delete File With Title ${file.getAttribute('data-name')} ?`
+            })
+        })
+
+        let newCurrentPage = getNumberPage(currentPageFile, totalPageFile)
+        for (const nav of navigationFile) {
+            if (nav.children[0].ariaLabel === 'Previous') {
+                nav.children[0].dataset.page = (currentPageFile - 1)
+                if (nav.children[0].dataset.click === 'false') {
+                    pagingButtonListener(nav.children[0], 'prev')
+                }
+            } else if (nav.children[0].ariaLabel === 'Next') {
+                nav.children[0].dataset.page = (currentPageFile + 1)
+                if (nav.children[0].dataset.click === 'false') {
+                    pagingButtonListener(nav.children[0], 'next')
+                }
+            } else if (nav.children[0].ariaLabel === 'First') {
+                if (nav.children[0].dataset.click === 'false') {
+                    nav.addEventListener('click', e => {
+                        if (currentPageFile === 0) return e.preventDefault()
+                        updatePage(e, 1)
+                    })
+                    nav.children[0].dataset.click = 'true'
+                }
+            } else if (nav.children[0].ariaLabel === 'Last') {
+                if (nav.children[0].dataset.click === 'false') {
+                    nav.addEventListener('click', e => {
+                        if (currentPageFile === totalPageFile - 1) return e.preventDefault()
+                        updatePage(e, totalPageFile)
+                    })
+                    nav.children[0].dataset.click = 'true'
+                }
+            } else {
+                nav.children[0].textContent = newCurrentPage
+                if (currentPageFile + 1 === newCurrentPage) {
+                    removeIfExist(nav.children[0], 'bg-transparent')
+                    addIfNotExist(nav.children[0], 'bg-sky-900')
+                } else {
+                    removeIfExist(nav.children[0], 'bg-sky-900')
+                    addIfNotExist(nav.children[0], 'bg-transparent')
+                }
+
+                if (newCurrentPage > totalPageFile) nav.style.display = 'none'
+                // console.log(nav.children[0].dataset.click)
+                if (nav.children[0].dataset.click === 'false') {
+                    pagingButtonListener(nav.children[0])
+                }
+                newCurrentPage++
+            }
+
+        }
+
+    }
+
+    function pagingButtonListener(nav, option = '') {
+        nav.addEventListener('click', (e) => {
+            e.preventDefault()
+            if (option === 'next')
+                if (currentPageFile === (totalPageFile - 1)) return
+            if (option === 'prev')
+                if (currentPageFile === 0) return
+            updatePage(e, (Number(nav.dataset.page) + 1) || Number(nav.textContent))
+        })
+        nav.dataset.click = 'true'
+    }
+
+    function updatePage(e, page) {
+        e.preventDefault()
+        updateFileTable(page - 1)
+    }
+
+    async function getApi(url) {
+        const response = await fetch(url)
+        const result = await response.json()
+        return result
+    }
+
+    function getNumberPage(currentPage, totalPage) {
+        if (currentPage == 0) {
+            return currentPage + 1
+        }
+        if (currentPage + 1 == totalPage && totalPage > 2) {
+            return currentPage - 1
+        }
+        return currentPage
+    }
+
+    function prevent(e) {
+        e.preventDefault()
+    }
+
+    function removeIfExist(removeItem, removeClass) {
+        if (removeItem.classList.contains(removeClass)) removeItem.classList.remove(removeClass)
+    }
+
+    function addIfNotExist(addItem, addClass) {
+        if (!addItem.classList.contains(addClass)) addItem.classList.add(addClass)
+    }
+
+
+
+    // deleteFile.forEach(file => {
+    //     file.addEventListener('click', e => {
+    //         e.preventDefault()
+    //         idDeleteFile.value = file.getAttribute('data-id')
+    //         nameDeleteFile.value = file.getAttribute('data-name')
+    //         deleteTextFile.textContent =
+    //             `Are You Sure Want Delete File With Title ${file.getAttribute('data-name')} ?`
+    //     })
+    // })
+</script>
+
+<% } } %>
+
+<%- include('partials/result-none')  %>
+
+<script defer>
+    "use strict"
+    document.addEventListener('DOMContentLoaded', () => {
+        const checkPlags = document.querySelector('#check')
+        const uploadPlags = document.querySelector('#upload-res')
+        const resultSection = document.querySelector('#result-none')
+        const spinner = document.querySelector('#spinner')
+        const spinnerT = document.querySelector('#loading-number')
+
+        const fileName = document.querySelector('#file-name')
+        const fileSize = document.querySelector('#file-size')
+        const fileChar = document.querySelector('#file-char')
+        const fileWord = document.querySelector('#file-word')
+
+        const textUniq = document.querySelector('#text-uniq')
+        const textPlag = document.querySelector('#text-plag')
+        const barUniq = document.querySelector('#bar-uniq')
+        const barPlag = document.querySelector('#bar-plag')
+        const previewPlag = document.querySelector('#preview')
+        const errorDokumen = document.querySelector('#error-file')
+
+        const tableFile = document.querySelector('#table-result')
+
+        checkPlags.addEventListener('click', e => {
+            e.preventDefault()
+            if (uploadPlags.files.length === 0) return
+            if (spinner.classList.contains('hidden')) {
+                spinner.classList.remove('hidden')
+                spinner.classList.add('flex')
+            }
+            if (!resultSection.classList.contains('hidden')) resultSection.classList.add('hidden')
+            const formData = new FormData()
+            formData.append('upload-res', uploadPlags.files[0])
+            formData.append('text', document.querySelector('textarea').value)
+            const [file] = uploadPlags.files
+            if (errorDokumen.classList.contains('inline-flex')) {
+                errorDokumen.classList.add('hidden')
+                errorDokumen.classList.remove('inline-flex')
+            }
+            if (file.name.split('.')[1].toLowerCase() !== 'pdf') {
+                spinner.classList.add('hidden')
+                spinner.classList.remove('flex')
+                if (errorDokumen.classList.contains('hidden')) {
+                    errorDokumen.classList.remove('hidden')
+                    errorDokumen.classList.add('inline-flex')
+                }
+                return console.log('gagal')
+            }
+            // return console.log(file.name.split('.')[1].toLowerCase() === 'pdf')
+            previewPlag.src = URL.createObjectURL(file)
+
+            fetch('/result-none', {
+                method: 'post',
+                body: formData
+            }).then(res => {
+                return res.json()
+            }).then(async res => {
+                resultSection.classList.remove('hidden')
+                const data = res.data
+                const trainData = res.file
+                const user = res.user
+
+                let allData = {}
+                let all = []
+
+                addDict(data, all)
+                trainData.forEach(data => {
+                    addDict(data.text, all)
+                })
+
+                all = [...new Set(all)]
+                all.forEach(e => allData[e] = {})
+
+                data.split(' ').forEach(e => {
+                    allData[e]['s'] = (allData[e]['s'] || 0) + 1
+                })
+
+                trainData.forEach((str, i) => {
+                    str.text.split(' ').forEach(f => {
+                        allData[f]['s' + (i + 1)] = (allData[f]['s' +
+                            (i + 1)
+                        ] || 0) + 1
+                    })
+                })
+
+                let resultAll = []
+
+                let averageSimilarity = 0
+                const keys = Object.keys(allData)
+                for (let i = 0; i < trainData.length; i++) {
+                    let e = 's' + (i + 1)
+                    let aTimesB = 0
+                    let aa = 0
+                    let bb = 0
+
+                    keys.forEach(f => {
+                        const a = allData[f]['s'] || 0
+                        const b = allData[f][e] || 0
+                        aTimesB += a * b
+                        aa += a * a
+                        bb += b * b
+                    })
+
+                    const result = (2 * aTimesB) / (aa + bb)
+                    // console.log(
+                    //     `Similarity Data ${i + 1} Is ${Math.round(result * 100)} %`
+                    // )
+                    resultAll.push({
+                        file: trainData[i],
+                        result: Math.round(result * 100)
+                    })
+                    averageSimilarity += Math.round(result * 100)
+                }
+                averageSimilarity /= trainData.length
+                averageSimilarity = Math.round(averageSimilarity)
+                spinnerT.textContent = 'Selesai'
+                await sleep()
+                if (spinner.classList.contains('flex')) {
+                    spinner.classList.remove('flex')
+                    spinner.classList.add('hidden')
+                }
+                resultAll.sort((a, b) => (a.result < b.result) ? 1 : -1)
+                // console.log(resultAll, averageSimilarity)
+                // resultAll = resultAll.filter(result => {
+                //     return result.result > 40
+                // })
+                resultAll = resultAll.slice(0, 10)
+
+                fileName.textContent = 'File Name : ' + res.fileUpload.name
+                fileSize.textContent = 'File Size : ' + formatBytes(res.fileUpload.size)
+                fileChar.textContent = 'Character : ' + separator(res.fileUpload.char)
+                fileWord.textContent = 'Words : ' + separator(res.fileUpload.word)
+
+                textUniq.textContent = 100 - averageSimilarity
+                textPlag.textContent = averageSimilarity
+                barUniq.textContent = 100 - averageSimilarity + ' %'
+                barUniq.style.width = 100 - averageSimilarity + '%'
+                barPlag.textContent = averageSimilarity + ' %'
+                barPlag.style.width = averageSimilarity + '%'
+
+                tableFile.innerHTML = ''
+                resultAll.forEach((res, i) => {
+                    const index = user.findIndex(o => {
+                        return o._id === res.file.uploader
+                    })
+                    const tr = document.createElement('tr')
+                    tr.classList.add('border-b', 'border-sky-500')
+
+                    const tdFileNumber = document.createElement('td')
+                    tdFileNumber.classList.add('px-6', 'py-4', 'whitespace-nowrap',
+                        'text-sm', 'font-medium')
+                    tdFileNumber.textContent = i + 1
+                    tr.appendChild(tdFileNumber)
+
+                    const tdFileName = document.createElement('td')
+                    tdFileName.classList.add('text-sm', 'font-light', 'px-6',
+                        'py-4')
+                    tdFileName.textContent = res.file.name
+                    tr.appendChild(tdFileName)
+
+                    const tdFileUploader = document.createElement('td')
+                    tdFileUploader.classList.add('text-sm', 'font-light', 'px-6',
+                        'py-4')
+                    tdFileUploader.textContent = user[index].name
+                    tr.appendChild(tdFileUploader)
+
+                    const tdFileResult = document.createElement('td')
+                    tdFileResult.classList.add('text-sm', 'font-light', 'px-6',
+                        'py-4', 'whitespace-nowrap')
+                    tdFileResult.textContent = res.result + ' %'
+                    tr.appendChild(tdFileResult)
+
+                    const tdFileShow = document.createElement('td')
+                    tdFileShow.classList.add('text-sm', 'font-light', 'px-6',
+                        'py-4', 'whitespace-nowrap')
+                    const link = document.createElement('a')
+                    link.classList.add('w-full', 'bg-sky-700', 'p-3',
+                        'rounded-lg', 'text-white')
+                    link.textContent = 'Show'
+                    link.href = 'docs/' + res.file.fileName
+                    link.target = '_blank'
+                    tdFileShow.appendChild(link)
+                    tr.appendChild(tdFileShow)
+
+                    tableFile.appendChild(tr)
+                })
+            })
+
+        })
+
+        function sleep() {
+            return new Promise(resolve => setTimeout(resolve, 100))
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes'
+
+            const k = 1024
+            const dm = decimals < 0 ? 0 : decimals
+            const sizes = ['Bytes', 'Kb', 'Mb', 'Gb', 'Tb', 'Pb', 'Eb', 'Zb', 'Yb']
+
+            const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
+        }
+
+        function addDict(datax, to) {
+            to.push(...datax.toLowerCase().split(' '))
+        }
+        // function addDict(datax, to) {
+        //     datax.toLowerCase().split(' ').forEach(e => {
+        //         e.trim()
+        //         if (!to.hasOwnProperty(e)) to[e] = {}
+        //     })
+        // }
+
+        function separator(numb) {
+            let str = numb.toString().split(".");
+            str[0] = str[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return str.join(".");
+        }
+    })
+</script>
+
+-views/index.ejs
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlagCheck</title>
+    <link rel="stylesheet" href="csss/output.css">
+    <script src="https://kit.fontawesome.com/524dd30d0c.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="bg-dark">
+
+    <!-- Nav Section -->
+    <header
+        class="bg-slate-900 top-0 left-0 w-full flex items-center p-2 backdrop-filter backdrop-blur-lg bg-opacity-30 border-b border-gray-800 sticky">
+        <div class="container">
+            <div class="flex items-center justify-between">
+                <div class="px-4">
+                    <a href="" class="block font-bold lg:text-xl text-white py-4">Plagiarsm Checker</a>
+                </div>
+                <nav class="text-white font-normal">
+                    <ul class="flex">
+                        <li class="mx-1 lg:mx-3 p-2 hover:bg-slate-700 hover:rounded-xl">Beranda</li>
+                        <li class="mx-1 lg:mx-3 p-2 hover:bg-slate-700 hover:rounded-xl ">Tentang Saya</li>
+                        <li class="mx-1 lg:mx-3 py-2 px-4 bg-slate-800  text-white rounded-xl hover:bg-slate-700">Masuk
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <!-- Nav Section -->
+
+    <!-- Description Section -->
+    <section class="mt-10 text-white min-h-8 lg:mt-0">
+        <div class="container">
+            <div class="flex flex-wrap items-center">
+                <div class="p-5 w-full h-40 lg:w-1/2 lg:h-full">
+                    <h1 class="font-bold text-2xl my-auto">Plagiarism Checker</h1>
+                    <p class="text-base">Website Ini Menggunakan Metode Jaccard Coefficient Untuk Mempersentasekan
+                        Kemiripian Dokumen Anda
+                        dengan Dokumen yang Terdapat di Database</p>
+                </div>
+                <div class="w-full my-4 lg:w-1/2 p-3">
+                    <div class="p-4">
+                        <form action="">
+                            <div class="w-full px-4">
+                                <textarea type="text" id="text"
+                                    class="w-full bg-slate-800 text-white p-3 rounded-md h-48 focus:border-2 focus:border-slate-700 focus:outline-none resize-none"
+                                    placeholder="Input Your Text"></textarea>
+                            </div>
+                            <div class="w-full my-5 px-4 flex items-center justify-between">
+                                <label for="upload">or Upload Your File (*.pdf)</label>
+                                <input
+                                    class="file:bg-slate-800 file:border-0 file:text-white file:rounded-md file:p-2 file:hover:bg-slate-700"
+                                    type="file" name="upload">
+                            </div>
+                            <button type="submit"
+                                class="w-full bg-slate-800 py-2 rounded-lg text-white hover:bg-slate-700"> <i
+                                    class="fa-solid fa-magnifying-glass mr-2"></i> Check
+                                Plagiarism</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <!-- Description Section -->
+
+    <!-- Result -->
+
+    <section class="pt-20 text-white">
+        <div class="container">
+            <div class="w-full px-4 text-center">
+                <h1 class="font-semibold text-2xl mb-2">Result</h1>
+            </div>
+            <div class="flex flex-wrap justify-between">
+                <div class="w-full lg:w-[49%] bg-slate-800 rounded-md p-4">
+                    <h2 class="font-semibold text-xl mb-3">Details</h2>
+                    <div class="flex">
+                        <p class="text-base w-1/2">Character : 2000</p>
+                        <p class="text-base w-1/2">Words : 50</p>
+                    </div>
+                </div>
+                <div class="w-full mt-5 lg:w-[49%] lg:mt-0 bg-slate-800 rounded-md p-4">
+                    <h2 class="font-semibold text-xl mb-3">Plagirsm Percentage</h2>
+                    <div class="flex">
+                        <p class="text-base w-1/2">Unique : 40%</p>
+                        <p class="text-base w-1/2">Plagiarism : 60%</p>
+                    </div>
+                    <div class="w-full mt-3 flex bg-slate-900 rounded-full">
+                        <div
+                            class="bg-slate-700 text-s font-medium text-blue-100 text-center p-0.5 leading-none rounded-l-full w-[60%]">
+                            60%
+                        </div>
+                        <div class="text-s font-medium text-blue-100 text-center p-0.5 leading-none w-[40%]">
+                            40%
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-800 mt-5 rounded-md p-4">
+                    <h2 class="font-semibold text-xl mb-3">File With High Similarity</h2>
+                    <table class="min-w-full text-white table-auto">
+                        <thead class="border-b border-slate-500 font-semibold">
+                            <tr>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    #
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Title Pdf
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Similarity
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Show
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-slate-500">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">1</td>
+                                <td class="text-sm font-light px-6 py-4">
+                                    Analisa Hasil USaha Dalam Rangka Menyambut Hari H
+                                </td>
+                                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                    50 %
+                                </td>
+                                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                    <a href="" class="w-full bg-slate-700 p-3 rounded-lg text-white">
+                                        Show
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-slate-500">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">2</td>
+                                <td class="text-sm font-light px-6 py-4">
+                                    Analisa Hasil USaha Dalam Rangka Menyambut Hari H
+                                </td>
+                                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                    50 %
+                                </td>
+                                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                    <a href="" class="w-full bg-slate-700 p-3 rounded-lg text-white">
+                                        Show
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Result -->
+
+    <!-- User and File View -->
+
+    <section>
+        <div class="container">
+            <div class="flex flex-wrap justify-between">
+                <div class="w-full bg-slate-800 lg:w-[49%]  mt-5 rounded-md p-4">
+                    <h2 class="font-semibold text-xl mb-3 text-white">All User</h2>
+                    <table class="min-w-full text-white table-auto">
+                        <thead class="border-b border-slate-500 font-semibold">
+                            <tr>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    #
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Username
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Id (NIM)
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-slate-500">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">1</td>
+                                <td class="text-sm font-light px-6 py-4">
+                                    Aris Akhyar Abdillah
+                                </td>
+                                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                    H071171505
+                                </td>
+                                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                    <a href=""
+                                        class="w-full mx-1 bg-slate-700 p-3 rounded-lg text-white hover:bg-yellow-500">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </a>
+                                    <a href=""
+                                        class="w-full mx-1 bg-slate-700 p-3 rounded-lg text-white hover:bg-red-500">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="w-full bg-slate-800 lg:w-[49%]  mt-5 rounded-md p-4">
+                    <h2 class="font-semibold text-xl mb-3 text-white">All Files</h2>
+                    <table class="min-w-full text-white table-auto">
+                        <thead class="border-b border-slate-500 font-semibold">
+                            <tr>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    #
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Title
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Uploader
+                                </th>
+                                <th scope="col" class="text-sm font-medium px-6 py-4 text-left">
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-slate-500">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">1</td>
+                                <td class="text-sm font-light px-6 py-4">
+                                    Analisa Hasil Usaha Dalam Rangka Menyambut Hari H
+                                </td>
+                                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                    H071171505
+                                </td>
+                                <td class="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                    <a href=""
+                                        class="w-full mx-1 bg-slate-700 p-3 rounded-lg text-white hover:bg-green-500">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <a href=""
+                                        class="w-full mx-1 bg-slate-700 p-3 rounded-lg text-white hover:bg-red-500">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- User and File View -->
+
+    <!-- Login -->
+    <section>
+        <div class="container">
+            <div class="w-full my-4 lg:w-1/2 lg:mx-auto p-3 text-white bg-slate-800 rounded-md">
+                <h2 class="font-semibold text-2xl mb-2 text-center">Login To Application</h2>
+                <div class="p-4">
+                    <form action="">
+                        <div class="w-full px-4 mb-8">
+                            <label for="id" class="text-base font-thin text-white">Id (NIM)</label>
+                            <input type="text" id="id"
+                                class="w-full bg-slate-700 text-slate-200 p-3 rounded-md focus:outline-none focus:ring-slate-400 focus:ring-1" />
+                        </div>
+                        <div class="w-full px-4 mb-8">
+                            <label for="password" class="text-base font-thin text-white">Password</label>
+                            <input type="password" id="password" class=" w-full bg-slate-700 text-slate-200 p-3 rounded-md focus:outline-none
+                            focus:ring-slate-400 focus:ring-1" />
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-slate-700 py-2 rounded-lg text-white hover:bg-slate-600">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Login -->
+
+    <!-- Footer -->
+    <footer class="bg-dark pt-10 pb-5">
+        <div class="container">
+            <div class="w-full pt-10 border-t border-slate-700">
+                <div class="flex items-center justify-center mb-5">
+                    <!-- Whatsapp -->
+                    <a href="https://wa.me/+6282195008936" target="_blank"
+                        class="w-9 h-9 mr-2 flex justify-center items-center">
+                        <svg role="img" width="25" class="fill-white hover:fill-slate-700" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <title>WhatsApp</title>
+                            <path
+                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                        </svg>
+                    </a>
+                    <a href="https://www.facebook.com/profile.php?id=100000053025926" target="_blank"
+                        class="w-9 h-9 mr-3 flex justify-center items-center">
+                        <svg role="img" width="25" viewBox="0 0 24 24" class="fill-white hover:fill-slate-700"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <title>Facebook</title>
+                            <path
+                                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                        </svg>
+                    </a>
+                    <a href="https://github.com/arxs-abd/arxs-abd" target="_blank"
+                        class="w-9 h-9 mr-3 flex justify-center items-center">
+                        <svg role="img" width="25" class="fill-white hover:fill-slate-700" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <title>GitHub</title>
+                            <path
+                                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                        </svg>
+                    </a>
+                </div>
+                <p class="font-medium text-xs text-slate-500 text-center">
+                    © 2022 Copyrigth : <span class="font-semibold">Aris Akhyar Abdillah</span>.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Footer -->
+</body>
+
+</html>
+
+-views/login-page.ejs
+<%- include('partials/login')  %>
+
+-views/main.ejs
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlagCheck</title>
+    <link rel="stylesheet" href="css/output.css">
+    <script src="https://kit.fontawesome.com/524dd30d0c.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="bg-sky-200">
+
+    <%- include('partials/navbar') %>
+
+    <%- body  %>
+
+    <%- include('partials/footer') %>
+
+    <script src="js/tw/index.js"></script>
+</body>
+
+</html>
+
+-.env
+MONGODB_URL=mongodb://127.0.0.1:27017/latihan
+SECRET_KEY=1n15kr1ps1
+
+-index.js
+require('dotenv').config()
+const express = require('express')
+const session = require('express-session')
+const ejsLayout = require('express-ejs-layouts')
+const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
+const flash = require('connect-flash')
+const methodeOverride = require('method-override')
+
+// Router
+const activityRouter = require('./routes/activity')
+
+const app = express()
+
+app.set('view engine', 'ejs')
+
+app.use(ejsLayout)
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({
+    extended : true
+}))
+app.use(express.static(__dirname + '/public'))
+app.use(cookieParser('1n15KR1p51'))
+app.use(session({
+    resave: true,
+    saveUninitialized: true,
+    secret: '1n15KR1p51',
+}))
+app.use(methodeOverride('_method'))
+app.use(flash())
+
+app.use(activityRouter)
+
+
+
+// listen on port
+app.listen(3000, () => console.log('Server Running at http://localhost:3000'))
+
+-package.json
+{
+  "name": "skripsi",
+  "version": "1.0.0",
+  "description": "Tugas Akhirku",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon -e js",
+    "tailwind": "npx tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch"
+  },
+  "keywords": [
+    "skirpsi"
+  ],
+  "author": "Aris Akhyar Abdillah",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.0",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.0.1",
+    "ejs": "^3.1.8",
+    "express": "^4.17.3",
+    "express-ejs-layouts": "^2.5.1",
+    "express-fileupload": "^1.3.1",
+    "express-session": "^1.17.2",
+    "express-validator": "^6.14.0",
+    "flash": "^1.1.0",
+    "jsonwebtoken": "^8.5.1",
+    "method-override": "^3.0.0",
+    "mongodb": "^4.4.1",
+    "mongoose": "^6.2.10",
+    "mongoose-paginate-v2": "^1.6.3",
+    "multer": "^1.4.4",
+    "nodemon": "^2.0.19",
+    "pdf-parse": "^1.1.1",
+    "sastrawijs": "^1.0.4",
+    "tailwindcss": "^3.0.23",
+    "tw-elements": "^1.0.0-alpha12"
+  }
+}
+
